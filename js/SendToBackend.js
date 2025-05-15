@@ -1,5 +1,9 @@
 // 📡 رابط الـ API الخاص بالخادم لاستقبال بيانات التفاعل
-const API_URL = "https://localhost:7089/api/captcha"; // غيّره حسب الحاجة
+//const API_URL = "https://localhost:7089/api/captcha"; // غيّره حسب الحاجة
+
+const API_URL = "https://captchasysbacksmart.onrender.com/api/captcha";
+
+
 
 // 🧩 دالة ترجع كائن يحتوي على كود الخطأ وسببه بناءً على نوع الخطأ
 function getErrorInfo(type) {
