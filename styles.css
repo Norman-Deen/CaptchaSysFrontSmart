@@ -1,0 +1,81 @@
+
+
+/* 🔵 تصميم الصفحة الأساسية */
+body {
+    display: flex;
+    justify-content: center; /* محاذاة المحتوى في المنتصف أفقيًا */
+    align-items: center; /* محاذاة المحتوى في المنتصف عموديًا */
+    height: 100vh; /* جعل المحتوى يمتد على كامل ارتفاع الشاشة */
+    background-color: #f4f4f4 !important; /* لون خلفية محايد */
+    font-family: Arial, sans-serif;
+    user-select: none !important; /* منع المستخدم من تحديد النص، لمنع أي سلوك غير مرغوب */
+}
+
+/* 🔵 صندوق الاختبار */
+.captcha-box {
+    display: flex;
+    flex-direction: column; /* ترتيب العناصر عموديًا */
+    align-items: center; /* محاذاة العناصر في المنتصف */
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    border: 2px solid #6f00ff; /* إطار رمادي فاتح */
+    width: 350px; /* تحديد عرض مناسب */
+    text-align: center;
+}
+
+/* 🔵 حاوية المربعات */
+#checkbox-container {
+    position: relative;
+    display: flex;
+    gap: 15px; /* مسافة بين المربعات */
+    margin-bottom: 10px;
+}
+
+/* 🔵 إعدادات المربعات */
+input[type="checkbox"] {
+    appearance: none; /* ✅ إزالة النمط الافتراضي للمتصفح */
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+
+    background-color: white;
+
+
+}
+
+
+/*  عرض الرسائل للمستخدم */
+.captcha-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    max-width: 300px;
+  }
+  
+  .captcha-message.info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+  }
+  
+  .captcha-message.warning {
+    color: #856404;
+    background-color: #fff3cd;
+  }
+  
+  .captcha-message.success {
+    color: #155724;
+    background-color: #d4edda;
+  }
+  
+  .captcha-message.error {
+    color: #721c24;
+    background-color: #f8d7da;
+  }
+
+
+  .captcha-box {
+  background-color: aqua;
+}
