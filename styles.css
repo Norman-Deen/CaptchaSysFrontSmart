@@ -28,6 +28,7 @@ body {
 #checkbox-container {
     position: relative;
     display: flex;
+    margin-top: 15px;
     gap: 15px; /* مسافة بين المربعات */
     margin-bottom: 10px;
 }
@@ -78,4 +79,66 @@ input[type="checkbox"] {
 
   .captcha-box {
   background-color: aqua;
+}
+
+
+
+
+
+
+/* 🔘 مجموعة الأزرار أعلى الصفحة */
+.button-group {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* مسافة بين الأزرار */
+}
+
+/* 🔘 الزر العام داخل المجموعة */
+.button-group button {
+  font-size: 16px;
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+
+/* 🔘 زر عرض السجل - بنفسجي */
+.log-button {
+  background-color: #6e8b63;
+}
+.log-button:hover {
+  background-color: #6e8b63;
+}
+
+/* 🔘 زر إخفاء/إظهار المربعات - أخضر مائل للرمادي */
+.toggle-fake-button {
+  background-color: #6e8b63; /* اللون من اختيارك */
+}
+.toggle-fake-button:hover {
+  background-color: #5a734f; /* أغمق شوي للتفاعل */
+}
+
+
+/* 🔘 زر التحليل الرسومي - أزرق */
+.analytics-button {
+  background-color: #007bff;
+}
+
+.analytics-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* 🔃 زر التحديث */
+.refresh-button {
+  background-color: #17a2b8;
+}
+.refresh-button:hover {
+  background-color: #117a8b;
 }

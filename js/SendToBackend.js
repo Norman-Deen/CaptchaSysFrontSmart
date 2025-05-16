@@ -1,7 +1,12 @@
 // 📡 رابط الـ API الخاص بالخادم لاستقبال بيانات التفاعل
-//const API_URL = "https://localhost:7089/api/captcha"; // غيّره حسب الحاجة
 
-const API_URL = "https://captchasysbacksmart.onrender.com/api/captcha";
+
+// ✅ اختيار الرابط الصحيح حسب البيئة (محلي أو منشور)
+const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+
+const API_URL = isLocal
+  ? "https://localhost:7089/api/captcha" // 🔁 للسيرفر المحلي
+  : "https://captchasysbacksmart.onrender.com/api/captcha"; // 🔁 للسيرفر المنشور
 
 
 

@@ -37,6 +37,12 @@ function setupCaptcha() {
     CaptchaState.allowClick = true;
     console.log(`🟢 Click allowed after ${Math.round(delay)}ms`);
   }, delay);
+
+CaptchaState.realCheckbox = checkboxes.real;
+
+// ✅ خزّن المربعات المزيفة فقط بمتغير عام:
+window.fakeBoxes = checkboxes.all.filter(box => box !== checkboxes.real);
+
 }
 
 // ✅ عند تحميل الصفحة

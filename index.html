@@ -9,6 +9,25 @@
 </head>
 
 <body>
+
+<div class="button-group">
+  <button class="log-button" onclick="window.open('logs-dashboard.html', '_blank')">
+    View Log
+  </button>
+  <button class="toggle-fake-button" onclick="toggleFakeBoxes()">
+    Toggle Fake Boxes
+  </button>
+    <button class="analytics-button" onclick="window.open('analytics-dashboard.html', '_blank')">
+   Analytics
+  </button>
+   <button class="refresh-button" onclick="location.reload()">
+    Refresh
+  </button>
+</div>
+
+
+
+
   <div class="captcha-box">
 
     <!-- ✅ الرسالة الثابتة التي تظهر دائماً -->
@@ -26,6 +45,17 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+
+<script>
+  function toggleFakeBoxes() {
+    if (!window.fakeBoxes) return;
+    window.fakeBoxes.forEach(box => {
+      box.style.display = (box.style.display === "none") ? "inline-block" : "none";
+    });
+  }
+</script>
+
+
 
 </body>
 

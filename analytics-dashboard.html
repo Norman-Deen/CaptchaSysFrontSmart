@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      text-align: center;
+    }
+
+    canvas {
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    button {
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #6e8b63;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #9bbc8e;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Attempt Analytics</h2>
+  <button onclick="loadCharts()">Refresh</button>
+
+  <canvas id="behaviorChartCanvas"></canvas>
+  <canvas id="statusChartCanvas"></canvas>
+
+  <script>
+    let behaviorChart, statusChart;
+
+    function loadCharts() {
+     const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+const API_URL = isLocal
+  ? "https://localhost:7089/api/log"
+  : "https://captchasysbacksmart.onrender.com/api/log";
+
+fetch(API_URL)
+
+        .then(res => res.json())
+        .then(lines => {
+          if (lines.length < 2) return;
+
+          const headers = lines[0].split(",");
+          const behaviorIndex = headers.indexOf("behaviorType");
+          const statusIndex = headers.indexOf("status");
+
+          let behaviorCounts = { human: 0, robot: 0 };
+          let statusCounts = { accepted: 0, banned: 0 };
+
+          for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val =>
+              val.replace(/^"|"$/g, "").trim()
+            );
+
+            const behavior = row[behaviorIndex];
+            const status = row[statusIndex];
+
+            if (behaviorCounts[behavior] !== undefined) behaviorCounts[behavior]++;
+            if (statusCounts[status] !== undefined) statusCounts[status]++;
+          }
+
+          // Destroy old charts if they exist
+          if (behaviorChart) behaviorChart.destroy();
+          if (statusChart) statusChart.destroy();
+
+          // Pie Chart: Human vs Robot
+          behaviorChart = new Chart(document.getElementById("behaviorChartCanvas"), {
+            type: "pie",
+            data: {
+              labels: ["Human", "Robot"],
+              datasets: [{
+                data: [behaviorCounts.human, behaviorCounts.robot],
+                backgroundColor: ["#28a745", "#dc3545"]
+              }]
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Human vs Robot"
+                },
+                legend: {
+                  position: "bottom"
+                }
+              }
+            }
+          });
+
+          // Bar Chart: Accepted vs Banned
+          statusChart = new Chart(document.getElementById("statusChartCanvas"), {
+            type: "bar",
+            data: {
+              labels: ["Accepted", "Banned"],
+              datasets: [{
+                label: "Attempts",
+                data: [statusCounts.accepted, statusCounts.banned],
+                backgroundColor: ["#007bff", "#ffc107"]
+              }]
+            },
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: "Accepted vs Banned"
+                },
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  precision: 0
+                }
+              }
+            }
+          });
+        })
+        .catch(err => {
+          console.error("Failed to load data:", err);
+        });
+    }
+
+    // Load on page load
+    window.onload = loadCharts;
+  </script>
+
+</body>
+</html>
