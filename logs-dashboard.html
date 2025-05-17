@@ -1,23 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Access Log Viewer</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-    button { font-size: 24px; padding: 20px; margin-bottom: 20px; width: 100%; }
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background: #eee; }
-    td { font-size: 14px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
 
-    
+    button {
+      font-size: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background: #eee;
+    }
+
+    td {
+      font-size: 14px;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 </head>
+
 <body>
-<button onclick="loadLog()">Refresh</button>
+  <button onclick="loadLog()">Refresh</button>
   <table id="logTable">
     <thead>
       <tr id="tableHeader"></tr>
@@ -29,11 +56,11 @@
 
 
 
-  const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+    const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
 
-const API_URL = isLocal
-  ? "https://localhost:7089/api/log"
-  : "https://captchasysbacksmart.onrender.com/api/log";
+    const API_URL = isLocal
+      ? "https://localhost:7089/api/log"
+      : "https://captchasysbacksmart.onrender.com/api/log";
 
 
     async function loadLog() {
@@ -71,17 +98,51 @@ const API_URL = isLocal
         if (status === "accepted") tr.style.backgroundColor = "#d4f7d4";
         if (status === "banned") tr.style.backgroundColor = "#f9d6d5";
 
-        row.forEach(cell => {
-          const td = document.createElement('td');
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
+row.forEach((cell, cellIndex) => {
+  const td = document.createElement('td');
+
+  // تبسيط التاريخ
+  if (headers.indexOf("timestamp") === cellIndex && cell) {
+    const date = new Date(cell);
+    td.textContent =
+      date.toLocaleDateString('en-GB') + " " +
+      date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+  // تبسيط user agent
+  } else if (headers.indexOf("userAgent") === cellIndex && cell) {
+    let result = "";
+    if (cell.includes("Windows NT 10.0")) result += "Windows 10 – ";
+    else if (cell.includes("Windows NT 11.0")) result += "Windows 11 – ";
+    else if (cell.includes("Android")) result += "Android – ";
+    else if (cell.includes("iPhone")) result += "iPhone – ";
+    else if (cell.includes("Mac")) result += "Mac – ";
+
+    const match = cell.match(/Chrome\/([\d\.]+)/);
+    if (match) result += "Chrome " + match[1].split('.')[0];
+    else if (cell.includes("Firefox")) result += "Firefox";
+    else if (cell.includes("Safari") && !cell.includes("Chrome")) result += "Safari";
+
+    td.textContent = result || cell;
+
+  } else {
+    td.textContent = cell;
+  }
+
+  tr.appendChild(td);
+});
+
+
+
+
 
         const actionCell = document.createElement('td');
         const delButton = document.createElement('button');
-       delButton.innerHTML = '<i class="fas fa-trash"></i>';
+        delButton.innerHTML = '<i class="fas fa-trash"></i>';
 
-    
+
         delButton.onclick = async () => {
           await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
           loadLog();
@@ -96,4 +157,5 @@ const API_URL = isLocal
     window.onload = loadLog;
   </script>
 </body>
+
 </html>
