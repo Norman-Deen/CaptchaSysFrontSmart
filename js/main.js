@@ -1,15 +1,27 @@
 // 📁 main.js
-// ✅ استيراد الوحدات
+
 import { MouseTracker } from "./MouseTracker.js";
 import { createCheckBoxes } from "./checkboxGenerator.js";
-import { isClickTooFast, isCenterClick } from "./validator.js";
+import {
+  isClickTooFast,
+  isCenterClick,
+  toggleFakeBoxes,
+  updateCaptchaBox,
+  disableCaptcha,
+  startBanTimer
+} from "./Service.js";
+window.toggleFakeBoxes = toggleFakeBoxes;
+
 import { sendToBackend } from "./SendToBackend.js";
 
-// ✅ عناصر HTML
+
+
+
+// HTML elements
 const checkboxContainer = document.getElementById("checkbox-container");
 const captchaBox = document.querySelector(".captcha-box");
 
-// ✅ حالة الكابتشا
+// Captcha state
 const CaptchaState = {
   realCheckbox: null,
   allowClick: false,
@@ -23,7 +35,7 @@ const CaptchaState = {
   },
 };
 
-// ✅ إعداد الكابتشا
+// Setup captcha
 function setupCaptcha() {
   const checkboxes = createCheckBoxes();
   CaptchaState.realCheckbox = checkboxes.real;
@@ -38,16 +50,12 @@ function setupCaptcha() {
     console.log(`🟢 Click allowed after ${Math.round(delay)}ms`);
   }, delay);
 
-CaptchaState.realCheckbox = checkboxes.real;
-
-// ✅ خزّن المربعات المزيفة فقط بمتغير عام:
-window.fakeBoxes = checkboxes.all.filter(box => box !== checkboxes.real);
-
+ // Store only the fake checkboxes in a global variable
+  window.fakeBoxes = checkboxes.all.filter(box => box !== checkboxes.real);
 }
 
-// ✅ عند تحميل الصفحة
+// On page load
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ نعرض الرسالة مرة وحدة عند تحميل الصفحة
   document.getElementById("captcha-static-label").textContent = "Click the box to verify you're human.";
 
   document.addEventListener("mousemove", (event) => {
@@ -56,21 +64,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-
   setupCaptcha();
 
   checkboxContainer.addEventListener("click", async (event) => {
-    let now = Date.now();
-    let clickX = event.clientX;
-    let clickY = event.clientY;
-    let timeDiff = CaptchaState.userInteraction.lastTime
+
+  //IMPORTANT: Uncomment the following block to enable real-user click protection
+  /*
+  if (!event.isTrusted) {
+    console.warn("Untrusted click blocked (likely from a script).");
+    return;
+  }
+  */
+
+
+    const now = Date.now();
+    const clickX = event.clientX;
+    const clickY = event.clientY;
+    const timeDiff = CaptchaState.userInteraction.lastTime
       ? now - CaptchaState.userInteraction.lastTime
       : null;
     CaptchaState.userInteraction.lastTime = now;
 
-    let dx = clickX - CaptchaState.userInteraction.lastX;
-    let dy = clickY - CaptchaState.userInteraction.lastY;
-    let distance = Math.hypot(dx, dy);
+    const dx = clickX - CaptchaState.userInteraction.lastX;
+    const dy = clickY - CaptchaState.userInteraction.lastY;
+    const distance = Math.hypot(dx, dy);
 
     if (
       !CaptchaState.allowClick ||
@@ -83,9 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (event.target === CaptchaState.realCheckbox) {
-      let rect = event.target.getBoundingClientRect();
-      let diffX = Math.abs(clickX - (rect.left + rect.width / 2));
-      let diffY = Math.abs(clickY - (rect.top + rect.height / 2));
+      const rect = event.target.getBoundingClientRect();
+      const diffX = Math.abs(clickX - (rect.left + rect.width / 2));
+      const diffY = Math.abs(clickY - (rect.top + rect.height / 2));
 
       if (isCenterClick(diffX, diffY)) {
         console.warn("🤖 Click was too perfect, suspicious");
@@ -102,24 +119,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // Show loading spinner
+      checkboxContainer.innerHTML = `
+        <div class="loading-spinner"></div>
+      `;
+
+      // Send data to backend
       const result = await sendToBackend(data);
 
-if (result?.status === "banned") {
-  checkboxContainer.innerHTML = `
-    <div style="color: red; font-size: 20px; font-weight: bold;">
-      🚫 Access denied. You have been permanently banned.
-    </div>`;
-  document.getElementById("captcha-static-label").style.display = "none";
-  return;
-}
+
+      if (result?.status === "banned") {
+        checkboxContainer.innerHTML = `
+          <div style="color: red; font-size: 20px; font-weight: bold;">
+            🚫 Access denied. You have been permanently banned.
+          </div>`;
+        document.getElementById("captcha-static-label").style.display = "none";
+        return;
+      }
 
       if (result?.status === "human") {
         document.getElementById("captcha-static-label").style.display = "none";
-
         checkboxContainer.innerHTML = `
-                        <div style="color: green; font-size: 20px; font-weight: bold;">
-                        ✅ Welcome! You have been verified as human.
-                        </div>`;
+          <div style="color: green; font-size: 20px; font-weight: bold;">
+            ✅ Welcome! You have been verified as human.
+          </div>`;
       }
     } else {
       handleFakeClick(event);
@@ -140,14 +163,12 @@ if (result?.status === "banned") {
   }
 });
 
-// ✅ معالجة النقرات الخاطئة
+// Handle incorrect clicks
 async function handleFakeClick(event) {
   event.preventDefault();
   CaptchaState.fakeClickCount++;
 
-  const boxIndex = [...checkboxContainer.querySelectorAll("input")].indexOf(
-    event.target
-  );
+  const boxIndex = [...checkboxContainer.querySelectorAll("input")].indexOf(event.target);
   CaptchaState.fakeBoxIndexes.push(boxIndex);
 
   if (CaptchaState.fakeClickCount === 1) {
@@ -155,7 +176,7 @@ async function handleFakeClick(event) {
     setupCaptcha();
   } else if (CaptchaState.fakeClickCount === 2) {
     console.log("⚠️ Second Fail: Banned for 2 Sec");
-    startBanTimer(2); // مؤقت بسيط للحظر المؤقت
+    startBanTimer(2, () => setTimeout(setupCaptcha, 1500));
   } else if (CaptchaState.fakeClickCount >= 3) {
     console.log("⚠️ Third Fail: Banned!");
     disableCaptcha();
@@ -169,62 +190,17 @@ async function handleFakeClick(event) {
       pageUrl: window.location.href,
     };
 
-    // ✅ إرسال تقرير للسيرفر
     const result = await sendToBackend(report);
 
-    // ✅ إظهار رسالة إذا تم تأكيد الحظر من الخادم (اختياري)
-if (result?.status === "banned") {
-  checkboxContainer.innerHTML = `
-    <div style="color: red; font-size: 20px; font-weight: bold;">
-      🚫 You have been permanently banned.
-    </div>`;
-    
-  // ✅ أخفي الرسالة الثابتة
-  document.getElementById("captcha-static-label").style.display = "none";
-}
+    if (result?.status === "banned") {
+      checkboxContainer.innerHTML = `
+        <div style="color: red; font-size: 20px; font-weight: bold;">
+          🚫 You have been permanently banned.
+        </div>`;
+      document.getElementById("captcha-static-label").style.display = "none";
+    }
 
-
-
-    // إعادة ضبط الحالة
     CaptchaState.fakeClickCount = 0;
     CaptchaState.fakeBoxIndexes = [];
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// ─────────────────────────────
-// ✅ أدوات مساعدة (Utilities)
-// ─────────────────────────────
-
-// ✅ بدء مؤقت حظر مؤقت (يمنع التفاعل لفترة محددة)
-function startBanTimer(seconds) {
-  checkboxContainer.style.pointerEvents = "none"; // منع النقر مؤقتاً
-  updateCaptchaBox(`⏳ ${seconds}`, "orange"); // عرض العداد
-  seconds--;
-
-  // كل ثانية نحدث الرقم الظاهر
-  const interval = setInterval(() => {
-    updateCaptchaBox(`⏳ ${seconds--}`, "orange");
-
-    if (seconds < 0) {
-      clearInterval(interval); // إيقاف العداد
-      checkboxContainer.style.pointerEvents = "auto"; // إعادة السماح بالنقر
-      updateCaptchaBox("🔄 You can try again.", "green"); // عرض رسالة إعادة المحاولة
-      setTimeout(setupCaptcha, 1500); // إعادة توليد الكابتشا بعد 1.5 ثانية
-    }
-  }, 1000);
-}
-
-// ✅ عرض رسالة نصية داخل الكابتشا بلون معين
-function updateCaptchaBox(message, color = "black") {
-  checkboxContainer.innerHTML = `
-        <div style="color: ${color}; font-size: 20px; font-weight: bold;">
-            ${message}
-        </div>`;
-}
-
-// ✅ تعطيل الكابتشا بشكل دائم بعد عدة محاولات خاطئة
-function disableCaptcha() {
-  updateCaptchaBox("🚫 You have been permanently banned.", "red"); // عرض رسالة حظر
-  checkboxContainer.style.pointerEvents = "none"; // منع النقر نهائياً
 }

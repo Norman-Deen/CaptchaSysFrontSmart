@@ -39,8 +39,6 @@
       font-size: 14px;
     }
   </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
 </head>
 
 <body>
@@ -53,15 +51,10 @@
   </table>
 
   <script>
-
-
-
     const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-
     const API_URL = isLocal
       ? "https://localhost:7089/api/log"
       : "https://captchasysbacksmart.onrender.com/api/log";
-
 
     async function loadLog() {
       const res = await fetch(API_URL);
@@ -77,6 +70,7 @@
 
       const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
       headers.push("Action");
+
       headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
@@ -93,55 +87,49 @@
         while (row.length < headers.length - 1) row.push("");
 
         const tr = document.createElement('tr');
-
         const status = row[statusIndex];
         if (status === "accepted") tr.style.backgroundColor = "#d4f7d4";
         if (status === "banned") tr.style.backgroundColor = "#f9d6d5";
 
-row.forEach((cell, cellIndex) => {
-  const td = document.createElement('td');
+        row.forEach((cell, cellIndex) => {
+          const td = document.createElement('td');
 
-  // تبسيط التاريخ
-  if (headers.indexOf("timestamp") === cellIndex && cell) {
-    const date = new Date(cell);
-    td.textContent =
-      date.toLocaleDateString('en-GB') + " " +
-      date.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+          // Simplify timestamp
+          if (headers.indexOf("timestamp") === cellIndex && cell) {
+            const date = new Date(cell);
+            td.textContent =
+              date.toLocaleDateString('en-GB') + " " +
+              date.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
 
-  // تبسيط user agent
-  } else if (headers.indexOf("userAgent") === cellIndex && cell) {
-    let result = "";
-    if (cell.includes("Windows NT 10.0")) result += "Windows 10 – ";
-    else if (cell.includes("Windows NT 11.0")) result += "Windows 11 – ";
-    else if (cell.includes("Android")) result += "Android – ";
-    else if (cell.includes("iPhone")) result += "iPhone – ";
-    else if (cell.includes("Mac")) result += "Mac – ";
+          // Simplify userAgent
+          } else if (headers.indexOf("userAgent") === cellIndex && cell) {
+            let result = "";
+            if (cell.includes("Windows NT 10.0")) result += "Windows 10 – ";
+            else if (cell.includes("Windows NT 11.0")) result += "Windows 11 – ";
+            else if (cell.includes("Android")) result += "Android – ";
+            else if (cell.includes("iPhone")) result += "iPhone – ";
+            else if (cell.includes("Mac")) result += "Mac – ";
 
-    const match = cell.match(/Chrome\/([\d\.]+)/);
-    if (match) result += "Chrome " + match[1].split('.')[0];
-    else if (cell.includes("Firefox")) result += "Firefox";
-    else if (cell.includes("Safari") && !cell.includes("Chrome")) result += "Safari";
+            const match = cell.match(/Chrome\/([\d\.]+)/);
+            if (match) result += "Chrome " + match[1].split('.')[0];
+            else if (cell.includes("Firefox")) result += "Firefox";
+            else if (cell.includes("Safari") && !cell.includes("Chrome")) result += "Safari";
 
-    td.textContent = result || cell;
+            td.textContent = result || cell;
 
-  } else {
-    td.textContent = cell;
-  }
+          } else {
+            td.textContent = cell;
+          }
 
-  tr.appendChild(td);
-});
-
-
-
-
+          tr.appendChild(td);
+        });
 
         const actionCell = document.createElement('td');
         const delButton = document.createElement('button');
-        delButton.innerHTML = '<i class="fas fa-trash"></i>';
-
+        delButton.textContent = "Delete";
 
         delButton.onclick = async () => {
           await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
@@ -157,5 +145,4 @@ row.forEach((cell, cellIndex) => {
     window.onload = loadLog;
   </script>
 </body>
-
 </html>

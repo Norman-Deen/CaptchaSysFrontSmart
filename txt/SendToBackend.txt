@@ -1,0 +1,103 @@
+// ✅ API endpoint for sending user interaction data to backend
+// هذا الملف يحتوي على الدالة المسؤولة عن إرسال بيانات تفاعل المستخدم مع الكابتشا إلى الخادم للتحليل والمعالجة
+
+// ✅ Determine the correct API URL based on the environment
+// تحديد ما إذا كنا نعمل على بيئة محلية (localhost) أم خادم خارجي (production)
+const isLocal =
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === "localhost"; // فحص اسم المضيف (host)
+
+const API_URL = isLocal
+  ? "https://localhost:7089/api/captcha" // إذا كنا على localhost نستخدم الخادم المحلي
+  : "https://captchasysbacksmart.onrender.com/api/captcha"; // أما في حال النشر، نستخدم الخادم الخارجي
+
+// ✅ Helper function to return reason based on error type
+// دالة مساعدة تُرجع سبب الخطأ حسب نوع النقر الخاطئ
+function getErrorInfo(type) {
+  const reasons = {
+    "fake-box": "Clicked on fake box",                 // تم النقر على مربع وهمي
+    "too-fast": "Click was too fast",                  // النقرة كانت سريعة جدًا
+    "center-click": "Click was too perfect (center)",  // النقرة كانت في مركز المربع تمامًا (غير طبيعية)
+    "no-movement": "No mouse movement detected",       // لم يتم تحريك الماوس قبل النقر
+    unknown: "Unknown or untracked attempt",           // محاولة لم يتم تصنيفها
+  };
+
+  return { reason: reasons[type] || reasons["unknown"] }; // إرجاع السبب أو 'unknown' كخيار افتراضي
+}
+
+// ✅ Main function to send interaction data to the backend server
+// الدالة الرئيسية لإرسال البيانات إلى الخادم
+export async function sendToBackend(
+  data,                     // بيانات التفاعل (حركة الماوس، السرعة... إلخ)
+  clickedFakeBox = false,   // هل تم النقر على مربع وهمي؟
+  errorType = null          // نوع الخطأ إذا وجد
+) {
+  let payload; // المتغير الذي سيحمل البيانات المرسلة
+
+  if (data.mode === "robot-detected") {
+    // إذا كانت البيانات تُشير إلى اكتشاف روبوت بشكل مباشر
+    payload = { ...data }; // إرسالها كما هي
+  } else if (clickedFakeBox) {
+    // إذا كانت محاولة النقر على مربع وهمي
+    const reason = getErrorInfo(errorType); // الحصول على السبب المناسب من دالة المساعدة
+
+    payload = {
+      behaviorType: "robot",               // اعتبرنا السلوك روبوت
+      movementPattern: "clicked-fake-box", // نمط الحركة المسجل
+      reason,                              // سبب الخطأ
+      pageUrl: window.location.href,       // عنوان الصفحة الحالية
+    };
+  } else {
+    // في الحالات العادية، يتم إرسال البيانات كما هي مع إضافة عنوان الصفحة
+    payload = {
+      ...data,
+      pageUrl: window.location.href,
+    };
+  }
+
+  try {
+    console.log(
+      "Sending payload to backend:",
+      JSON.stringify(payload, null, 2)
+    ); // طباعة البيانات المُرسلة على شكل JSON منسق
+
+    const response = await fetch(API_URL, {
+      method: "POST",                      // استخدام POST لإرسال البيانات
+      headers: {
+        "Content-Type": "application/json" // إعلام الخادم أن نوع البيانات هو JSON
+      },
+      body: JSON.stringify(payload),       // تحويل البيانات إلى JSON فعليًا وإرسالها
+    });
+
+    console.log("Server responded with status:", response.status); // عرض كود الاستجابة
+    console.log("Raw response headers:", [...response.headers.entries()]); // عرض رؤوس الاستجابة كاملة
+
+    // ✅ التأكد من أن الخادم ردّ بمحتوى من نوع JSON
+    const contentType = response.headers.get("Content-Type") || "";
+    if (!contentType.includes("application/json")) {
+      console.warn("Response is not JSON."); // تحذير في حال لم تكن الاستجابة من نوع JSON
+      return { success: false };
+    }
+
+    let result = null;
+
+    try {
+      const text = await response.text(); // قراءة النص الكامل للاستجابة
+      result = text ? JSON.parse(text) : null; // محاولة تحويل النص إلى JSON
+    } catch (jsonError) {
+      console.error("Failed to parse JSON manually:", jsonError); // فشل تحويل الاستجابة إلى JSON
+      return { success: false };
+    }
+
+    if (!result) {
+      console.error("No usable response from backend!"); // لم يتم استلام رد مفيد
+      return { success: false };
+    }
+
+    console.log("Backend response:", result); // عرض الرد القادم من الخادم
+    return result; // إرجاع النتيجة النهائية إلى الكابتشا
+  } catch (error) {
+    console.error("Fetch failed completely!", error); // فشل شامل في الاتصال بالخادم
+    return { success: false }; // الرد بفشل عام
+  }
+}

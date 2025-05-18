@@ -1,16 +1,15 @@
-// 📡 رابط الـ API الخاص بالخادم لاستقبال بيانات التفاعل
+// API endpoint for sending user interaction data to backend
 
-
-// ✅ اختيار الرابط الصحيح حسب البيئة (محلي أو منشور)
-const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+// Determine the correct API URL based on the environment
+const isLocal =
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === "localhost";
 
 const API_URL = isLocal
-  ? "https://localhost:7089/api/captcha" // 🔁 للسيرفر المحلي
-  : "https://captchasysbacksmart.onrender.com/api/captcha"; // 🔁 للسيرفر المنشور
+  ? "https://localhost:7089/api/captcha" // Local server
+  : "https://captchasysbacksmart.onrender.com/api/captcha"; // Deployed server
 
-
-
-// 🧩 دالة ترجع كائن يحتوي على كود الخطأ وسببه بناءً على نوع الخطأ
+// Helper function to return reason based on error type
 function getErrorInfo(type) {
   const reasons = {
     "fake-box": "Clicked on fake box",
@@ -23,7 +22,7 @@ function getErrorInfo(type) {
   return { reason: reasons[type] || reasons["unknown"] };
 }
 
-// 🚀 الدالة الرئيسية لإرسال البيانات إلى الخادم
+// Main function to send interaction data to the backend server
 export async function sendToBackend(
   data,
   clickedFakeBox = false,
@@ -34,7 +33,7 @@ export async function sendToBackend(
   if (data.mode === "robot-detected") {
     payload = { ...data };
   } else if (clickedFakeBox) {
-   const reason = getErrorInfo(errorType);
+    const reason = getErrorInfo(errorType);
 
     payload = {
       behaviorType: "robot",
@@ -51,7 +50,7 @@ export async function sendToBackend(
 
   try {
     console.log(
-      "📤 Sending payload to backend:",
+      "Sending payload to backend:",
       JSON.stringify(payload, null, 2)
     );
 
@@ -63,13 +62,13 @@ export async function sendToBackend(
       body: JSON.stringify(payload),
     });
 
-    console.log("✅ Server responded with status:", response.status);
-    console.log("🧪 Raw response headers:", [...response.headers.entries()]);
+    console.log("Server responded with status:", response.status);
+    console.log("Raw response headers:", [...response.headers.entries()]);
 
-    // ✅ تحقق من نوع المحتوى قبل محاولة قراءة JSON
+    // Check if response content is JSON
     const contentType = response.headers.get("Content-Type") || "";
     if (!contentType.includes("application/json")) {
-      console.warn("⚠️ Response is not JSON.");
+      console.warn("Response is not JSON.");
       return { success: false };
     }
 
@@ -79,19 +78,19 @@ export async function sendToBackend(
       const text = await response.text();
       result = text ? JSON.parse(text) : null;
     } catch (jsonError) {
-      console.error("❌ Failed to parse JSON manually:", jsonError);
+      console.error("Failed to parse JSON manually:", jsonError);
       return { success: false };
     }
 
     if (!result) {
-      console.error("❌ No usable response from backend!");
+      console.error("No usable response from backend!");
       return { success: false };
     }
 
-    console.log("📡 Backend response:", result);
+    console.log("Backend response:", result);
     return result;
   } catch (error) {
-    console.error("❌ Fetch failed completely!", error);
+    console.error("Fetch failed completely!", error);
     return { success: false };
   }
 }

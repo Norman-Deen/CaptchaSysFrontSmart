@@ -1,0 +1,187 @@
+// 📁 main.js – الملف الرئيسي لتنفيذ كابتشا ذكية تعتمد على حركة الماوس
+
+import { MouseTracker } from "./MouseTracker.js"; // استيراد وحدة تتبع حركة وتحليل سلوك الماوس
+import { createCheckBoxes } from "./checkboxGenerator.js"; // استيراد دالة إنشاء المربعات (واحد حقيقي والباقي وهمي)
+import {
+  isClickTooFast,     // دالة للتحقق من سرعة النقر (هل كانت أسرع من الطبيعي؟)
+  isCenterClick,      // دالة للتحقق إذا كانت النقرة في مركز المربع تمامًا (سلوك روبوت محتمل)
+  toggleFakeBoxes,    // دالة تبديل المربعات الوهمية يدويًا (لأغراض الاختبار)
+  updateCaptchaBox,   // دالة لتحديث محتوى واجهة الكابتشا برسائل حسب الحالة
+  disableCaptcha,     // دالة لتعطيل الكابتشا بالكامل بعد محاولات خاطئة متعددة
+  startBanTimer       // دالة تبدأ مؤقت حظر مؤقت (ثوانٍ) بعد محاولتين خاطئتين
+} from "./Service.js";
+
+window.toggleFakeBoxes = toggleFakeBoxes; // جعل toggleFakeBoxes متاحة في واجهة المتصفح (مثلًا عند الضغط على زر خارجي)
+import { sendToBackend } from "./SendToBackend.js"; // استيراد دالة إرسال تقرير التفاعل إلى الخادم للتحليل
+
+const checkboxContainer = document.getElementById("checkbox-container"); // عنصر HTML الذي يحتوي على مربعات الكابتشا
+const captchaBox = document.querySelector(".captcha-box"); // العنصر الكامل لصندوق الكابتشا (للاستماع لحركة الماوس)
+
+const CaptchaState = { // كائن يحتوي على جميع المعلومات المتعلقة بالحالة الحالية للكابتشا
+  realCheckbox: null,            // المربع الحقيقي الذي يجب النقر عليه (يُحدد لاحقًا)
+  allowClick: false,             // هل يُسمح بالنقر حاليًا؟ (بعد تأخير)
+  fakeClickCount: 0,             // عدد النقرات الخاطئة
+  fakeBoxIndexes: [],            // فهارس المربعات التي نُقر عليها بالخطأ
+  userInteraction: {
+    lastTime: 0,                 // توقيت آخر نقرة
+    lastX: 0, lastY: 0,          // موقع آخر نقرة
+    mouseMoved: false,           // هل تحرك الماوس قبل النقر؟ (يُستخدم كدليل على التفاعل البشري)
+  },
+};
+
+function setupCaptcha() { // دالة لإعادة إنشاء الكابتشا من جديد
+  const checkboxes = createCheckBoxes(); // توليد مربعات التحقق (واحد حقيقي والباقي وهمي)
+  CaptchaState.realCheckbox = checkboxes.real; // حفظ المربع الحقيقي
+
+  checkboxContainer.innerHTML = ""; // تفريغ الحاوية من أي محتوى قديم
+  checkboxes.all.forEach((box) => checkboxContainer.appendChild(box)); // إضافة جميع المربعات إلى الواجهة
+
+  CaptchaState.allowClick = false; // منع النقر مؤقتًا
+  const delay = 500 + Math.random() * 1000; // تأخير عشوائي بين 500 و 1500 ميلي ثانية
+
+  setTimeout(() => {
+    CaptchaState.allowClick = true; // السماح بالنقر بعد انتهاء المؤقت
+    console.log(`🟢 Click allowed after ${Math.round(delay)}ms`); // عرض الوقت في الكونسول
+  }, delay);
+
+  window.fakeBoxes = checkboxes.all.filter(box => box !== checkboxes.real); // حفظ المربعات الوهمية في متغير عام
+}
+
+document.addEventListener("DOMContentLoaded", () => { // عند تحميل الصفحة بالكامل
+  document.getElementById("captcha-static-label").textContent = "Click the box to verify you're human."; // إعداد الرسالة الثابتة الأولية
+
+  document.addEventListener("mousemove", (event) => { // عند تحرك الماوس في أي مكان
+    if (Math.abs(event.movementX) > 1 || Math.abs(event.movementY) > 1) {
+      CaptchaState.userInteraction.mouseMoved = true; // تسجيل أن الماوس قد تحرك فعلاً
+    }
+  });
+
+  setupCaptcha(); // تشغيل الكابتشا لأول مرة
+
+  checkboxContainer.addEventListener("click", async (event) => { // عند نقر المستخدم على أحد المربعات
+
+    /*
+    if (!event.isTrusted) {
+      console.warn("Untrusted click blocked (likely from a script).");
+      return;
+    }
+    */ // يمكن تفعيل هذا الجزء لحظر النقرات الآلية الغير موثوقة (برمجيات)
+
+    const now = Date.now(); // الوقت الحالي
+    const clickX = event.clientX; // موضع النقرة الأفقي
+    const clickY = event.clientY; // موضع النقرة العمودي
+    const timeDiff = CaptchaState.userInteraction.lastTime ? now - CaptchaState.userInteraction.lastTime : null; // الفرق الزمني مع النقرة السابقة
+    CaptchaState.userInteraction.lastTime = now;
+
+    const dx = clickX - CaptchaState.userInteraction.lastX;
+    const dy = clickY - CaptchaState.userInteraction.lastY;
+    const distance = Math.hypot(dx, dy); // المسافة الفعلية التي تحرك فيها الماوس
+
+    if (
+      !CaptchaState.allowClick || // النقر قبل المسموح
+      isClickTooFast(timeDiff) || // النقرة سريعة جدًا
+      !CaptchaState.userInteraction.mouseMoved || // لم يتم تحريك الماوس
+      distance < 10 // الحركة كانت شبه معدومة (ضغط مباشر)
+    ) {
+      console.warn("⚠️ Suspicious click attempt");
+      return handleFakeClick(event); // التعامل معها كمحاولة خاطئة
+    }
+
+    if (event.target === CaptchaState.realCheckbox) { // إذا كان النقر على المربع الصحيح
+      const rect = event.target.getBoundingClientRect(); // أبعاد المربع
+      const diffX = Math.abs(clickX - (rect.left + rect.width / 2));
+      const diffY = Math.abs(clickY - (rect.top + rect.height / 2));
+
+      if (isCenterClick(diffX, diffY)) {
+        console.warn("🤖 Click was too perfect, suspicious"); // نقر مثالي جدًا، احتمال روبوت
+        return handleFakeClick(event);
+      }
+
+      console.log("✅ Verification successful");
+      CaptchaState.fakeClickCount = 0;
+      CaptchaState.fakeBoxIndexes = [];
+
+      const data = MouseTracker.handleClick(event); // تحليل بيانات الحركة
+      if (!data || !data.speedSeries || data.speedSeries.length < 5) {
+        console.warn("⛔ Ignored incomplete or invalid data.");
+        return;
+      }
+
+      checkboxContainer.innerHTML = `<div class="loading-spinner"></div>`; // إظهار مؤشر تحميل
+
+      const result = await sendToBackend(data); // إرسال البيانات إلى الخادم
+
+      if (result?.status === "banned") {
+        checkboxContainer.innerHTML = `
+          <div style="color: red; font-size: 20px; font-weight: bold;">
+            🚫 Access denied. You have been permanently banned.
+          </div>`;
+        document.getElementById("captcha-static-label").style.display = "none";
+        return;
+      }
+
+      if (result?.status === "human") {
+        document.getElementById("captcha-static-label").style.display = "none";
+        checkboxContainer.innerHTML = `
+          <div style="color: green; font-size: 20px; font-weight: bold;">
+            ✅ Welcome! You have been verified as human.
+          </div>`;
+      }
+    } else {
+      handleFakeClick(event); // نقر على مربع خاطئ
+    }
+
+    CaptchaState.userInteraction.lastX = clickX; // حفظ موقع آخر نقرة
+    CaptchaState.userInteraction.lastY = clickY;
+    CaptchaState.userInteraction.mouseMoved = false; // إعادة تعيين المتغير
+  });
+
+  if (captchaBox) { // إذا كان عنصر الكابتشا موجودًا
+    captchaBox.addEventListener("mouseenter", (event) =>
+      MouseTracker.startTracking(event)); // بدء تتبع الحركة عند دخول الماوس
+
+    captchaBox.addEventListener("mousemove", (event) =>
+      MouseTracker.trackMovement(event)); // تسجيل حركة الماوس داخل الصندوق
+  }
+});
+
+async function handleFakeClick(event) { // دالة لمعالجة النقر على مربع خاطئ
+  event.preventDefault(); // منع السلوك الافتراضي
+  CaptchaState.fakeClickCount++; // زيادة عدد المحاولات الفاشلة
+
+  const boxIndex = [...checkboxContainer.querySelectorAll("input")].indexOf(event.target);
+  CaptchaState.fakeBoxIndexes.push(boxIndex); // حفظ الفهرس للمربع الذي تم النقر عليه
+
+  if (CaptchaState.fakeClickCount === 1) {
+    console.log("⚠️ First Fail");
+    setupCaptcha(); // إعادة تحميل الكابتشا
+  } else if (CaptchaState.fakeClickCount === 2) {
+    console.log("⚠️ Second Fail: Banned for 2 Sec");
+    startBanTimer(2, () => setTimeout(setupCaptcha, 1500)); // تنفيذ حظر مؤقت ثم إعادة الكابتشا
+  } else if (CaptchaState.fakeClickCount >= 3) {
+    console.log("⚠️ Third Fail: Banned!");
+    disableCaptcha(); // تعطيل الكابتشا نهائيًا
+
+    const report = {
+      mode: "robot-detected", // سبب التقرير
+      reason: "Three fake clicks detected",
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      boxIndexes: CaptchaState.fakeBoxIndexes,
+      pageUrl: window.location.href,
+    };
+
+    const result = await sendToBackend(report); // إرسال التقرير للخلفية
+
+    if (result?.status === "banned") {
+      checkboxContainer.innerHTML = `
+        <div style="color: red; font-size: 20px; font-weight: bold;">
+          🚫 You have been permanently banned.
+        </div>`;
+      document.getElementById("captcha-static-label").style.display = "none";
+    }
+
+    CaptchaState.fakeClickCount = 0;
+    CaptchaState.fakeBoxIndexes = []; // إعادة ضبط الحالة
+  }
+}

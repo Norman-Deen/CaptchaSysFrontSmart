@@ -1,102 +1,87 @@
-
-
-/* 🔵 تصميم الصفحة الأساسية */
+/* Basic page styling */
 body {
-    display: flex;
-    justify-content: center; /* محاذاة المحتوى في المنتصف أفقيًا */
-    align-items: center; /* محاذاة المحتوى في المنتصف عموديًا */
-    height: 100vh; /* جعل المحتوى يمتد على كامل ارتفاع الشاشة */
-    background-color: #f4f4f4 !important; /* لون خلفية محايد */
-    font-family: Arial, sans-serif;
-    user-select: none !important; /* منع المستخدم من تحديد النص، لمنع أي سلوك غير مرغوب */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  height: 100vh; /* Full screen height */
+  background-color: #f4f4f4 !important;
+  font-family: Arial, sans-serif;
+  user-select: none !important; /* Prevent text selection */
 }
 
-/* 🔵 صندوق الاختبار */
+/* Captcha container box */
 .captcha-box {
-    display: flex;
-    flex-direction: column; /* ترتيب العناصر عموديًا */
-    align-items: center; /* محاذاة العناصر في المنتصف */
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    border: 2px solid #6f00ff; /* إطار رمادي فاتح */
-    width: 350px; /* تحديد عرض مناسب */
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 20px;
+  border-radius: 5px;
+  border: 2px solid #6f00ff;
+  width: 350px;
+  text-align: center;
+  background-color: #cee8c4;
 }
 
-/* 🔵 حاوية المربعات */
+/* Checkbox container */
 #checkbox-container {
-    position: relative;
-    display: flex;
-    margin-top: 15px;
-    gap: 15px; /* مسافة بين المربعات */
-    margin-bottom: 10px;
+  position: relative;
+  display: flex;
+  margin-top: 15px;
+  gap: 15px;
+  margin-bottom: 10px;
 }
 
-/* 🔵 إعدادات المربعات */
+/* Checkbox styling */
 input[type="checkbox"] {
-    appearance: none; /* ✅ إزالة النمط الافتراضي للمتصفح */
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-
-    background-color: white;
-
-
+  appearance: none; /* Remove default browser style */
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  background-color: white;
 }
 
-
-/*  عرض الرسائل للمستخدم */
+/* Captcha message display */
 .captcha-message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    max-width: 300px;
-  }
-  
-  .captcha-message.info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-  }
-  
-  .captcha-message.warning {
-    color: #856404;
-    background-color: #fff3cd;
-  }
-  
-  .captcha-message.success {
-    color: #155724;
-    background-color: #d4edda;
-  }
-  
-  .captcha-message.error {
-    color: #721c24;
-    background-color: #f8d7da;
-  }
-
-
-  .captcha-box {
-  background-color: aqua;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  max-width: 300px;
 }
 
+.captcha-message.info {
+  color: #0c5460;
+  background-color: #d1ecf1;
+}
 
+.captcha-message.warning {
+  color: #856404;
+  background-color: #fff3cd;
+}
 
+.captcha-message.success {
+  color: #155724;
+  background-color: #d4edda;
+}
 
+.captcha-message.error {
+  color: #721c24;
+  background-color: #f8d7da;
+}
 
-
-/* 🔘 مجموعة الأزرار أعلى الصفحة */
+/* Button group at top right */
 .button-group {
   position: absolute;
   top: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px; /* مسافة بين الأزرار */
+  gap: 10px;
 }
 
-/* 🔘 الزر العام داخل المجموعة */
+/* Button styles */
 .button-group button {
   font-size: 16px;
   padding: 10px 20px;
@@ -104,41 +89,55 @@ input[type="checkbox"] {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease;
 }
 
-/* 🔘 زر عرض السجل - بنفسجي */
+/* Log button - green */
 .log-button {
-  background-color: #6e8b63;
+  background-color: #59a13c;
 }
 .log-button:hover {
   background-color: #6e8b63;
 }
 
-/* 🔘 زر إخفاء/إظهار المربعات - أخضر مائل للرمادي */
+/* Toggle fake boxes button - olive green */
 .toggle-fake-button {
-  background-color: #6e8b63; /* اللون من اختيارك */
+  background-color: #6e8b63;
 }
 .toggle-fake-button:hover {
-  background-color: #5a734f; /* أغمق شوي للتفاعل */
+  background-color: #5a734f;
 }
 
-
-/* 🔘 زر التحليل الرسومي - أزرق */
+/* Analytics button - blue */
 .analytics-button {
   background-color: #007bff;
 }
-
 .analytics-button:hover {
   background-color: #0056b3;
 }
 
-
-/* 🔃 زر التحديث */
+/* Refresh button - cyan */
 .refresh-button {
   background-color: #17a2b8;
 }
 .refresh-button:hover {
   background-color: #117a8b;
 }
+
+/* loading when righ click */
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 4px solid #ccc;
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
