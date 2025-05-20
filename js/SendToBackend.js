@@ -6,8 +6,10 @@ const isLocal =
   window.location.hostname === "localhost";
 
 const API_URL = isLocal
-  ? "https://localhost:7089/api/captcha" // Local server
-  : "https://captchasysbacksmart.onrender.com/api/captcha"; // Deployed server
+  ? "http://127.0.0.1:8080/api/captcha"
+  : "https://captchasysbacksmart.onrender.com/api/captcha";
+
+
 
 // Helper function to return reason based on error type
 function getErrorInfo(type) {

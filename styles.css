@@ -9,19 +9,48 @@ body {
   user-select: none !important; /* Prevent text selection */
 }
 
+
+
+
 /* Captcha container box */
 .captcha-box {
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
   align-items: center;
-
-  padding: 20px;
+  justify-content: space-between;
+  gap: 10px;
   border-radius: 5px;
-  border: 2px solid #6f00ff;
-  width: 350px;
-  text-align: center;
-  background-color: #cee8c4;
+  border: 1px solid gray;
+  width: 450px; /* أصغر */
+  padding: 8px 10px;
+  background-color: #f8f8f8;
 }
+
+/* Text + Checkbox */
+.checkbox-with-text {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+   margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+
+
+/* Logo size */
+.captcha-logo {
+  width: 80px;
+  height: auto;
+}
+
+
+
+/* Label style */
+.captcha-label {
+  font-size: 1.2rem;
+   color: #727272; /* ← لون غامق */
+}
+
 
 /* Checkbox container */
 #checkbox-container {
@@ -30,13 +59,14 @@ body {
   margin-top: 15px;
   gap: 15px;
   margin-bottom: 10px;
+  margin-left: 15px; /* ← حرّكه لليمين */
 }
 
 /* Checkbox styling */
 input[type="checkbox"] {
   appearance: none; /* Remove default browser style */
-  width: 25px;
-  height: 25px;
+  width: 36px;
+  aspect-ratio: 1 / 1;
   cursor: pointer;
   background-color: white;
 }
@@ -70,6 +100,8 @@ input[type="checkbox"] {
   color: #721c24;
   background-color: #f8d7da;
 }
+
+
 
 /* Button group at top right */
 .button-group {
@@ -127,17 +159,43 @@ input[type="checkbox"] {
 
 /* loading when righ click */
 .loading-spinner {
-    width: 30px;
-    height: 30px;
-    border: 4px solid #ccc;
-    border-top-color: #333;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
-  }
+  width: 30px;
+  height: 30px;
+  border: 4px solid #ccc;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+
+
+
+
+/* ستايل عام للجميع */
+.checkbox-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10%;
+  cursor: pointer;
+  appearance: none;
+}
+
+/* الفايك */
+.fake-checkbox {
+  border: 2px solid red;
+  background-color: #ffeaea;
+}
+
+/* الحقيقي */
+.real-checkbox {
+  border: 2px solid rgb(163, 163, 163);
+  background-color: #eaffea;
+}
+

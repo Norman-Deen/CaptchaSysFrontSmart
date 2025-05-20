@@ -8,7 +8,7 @@ export function isClickTooFast(timeDiff) {
 }
 
 // Used to detect unrealistic precision — a sign of robotic clicking.
-export function isCenterClick(diffX, diffY, tolerance = 1) {
+export function isCenterClick(diffX, diffY, tolerance) {
   // If the click is too close to the center, it’s considered too perfect.
   return diffX < tolerance && diffY < tolerance;
 }
@@ -51,10 +51,12 @@ export function startBanTimer(seconds, onEnd = null) {
       clearInterval(interval);
       checkboxContainer.style.pointerEvents = "auto";
       updateCaptchaBox("🔄 You can try again.", "green");
+
       if (onEnd) onEnd();
     }
   }, 1000);
 }
+
 
 // Toggle visibility of fake checkboxes
 // Used for debugging or visual indication; shows/hides decoy boxes.

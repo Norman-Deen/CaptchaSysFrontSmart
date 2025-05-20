@@ -26,19 +26,25 @@
     </button>
   </div>
 
+
+
   <div class="captcha-box">
 
-    <!-- Static message label -->
-    <div id="captcha-static-label" class="captcha-label"></div>
+    <img src="images/RecaptchaLogo.svg.png" alt="reCAPTCHA Logo" class="captcha-logo" />
 
-    <!-- The checkboxes are injected here -->
-    <div id="checkbox-container"></div>
+    <div class="checkbox-with-text">
+      <div id="checkbox-container"></div>
+      <div id="captcha-static-label" class="captcha-label">I am human</div>
+    </div>
 
-    <!-- The dynamic messages (error, warning, temporary success) -->
-    <div id="captcha-message" class="captcha-message"></div>
   </div>
+
+
+
+
 
   <script type="module" src="js/main.js"></script>
 
 </body>
+
 </html>

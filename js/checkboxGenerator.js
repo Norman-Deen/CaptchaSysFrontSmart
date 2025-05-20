@@ -4,21 +4,20 @@
 export function createCheckBoxes() {
   let checkboxes = [];
 
-  // Create 4 fake checkboxes (inactive)
-  for (let i = 0; i < 4; i++) {
-    let fakeBox = document.createElement("input");
-    fakeBox.type = "checkbox";
-    fakeBox.classList.add("hidden-checkbox"); // Add class to hide via CSS
-    checkboxes.push(fakeBox);
-  }
+ // Create 4 fake checkboxes (inactive)
+for (let i = 0; i < 4; i++) {
+  let fakeBox = document.createElement("input");
+  fakeBox.type = "checkbox";
+  fakeBox.classList.add("checkbox-box", "fake-checkbox"); // ← أضف هذا
+  checkboxes.push(fakeBox);
+}
 
-  // Create the real checkbox (the one to be correctly clicked)
-  let realBox = document.createElement("input");
-  realBox.type = "checkbox";
-  realBox.classList.add("hidden-checkbox");
+// Create the real checkbox
+let realBox = document.createElement("input");
+realBox.type = "checkbox";
+realBox.classList.add("checkbox-box", "real-checkbox"); // ← أضف هذا
 
-  // (For testing only): Highlight the real box with a green outline
-  realBox.style.outline = "2px solid limegreen";
+
 
   // Choose a random position in the array (not on the edges) for the real box
   let possiblePositions = [1, 3];
