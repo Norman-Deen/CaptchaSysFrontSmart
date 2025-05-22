@@ -1,5 +1,5 @@
 // 📁 Mouse-main.js
-console.log("✅ Mouse-main.js loaded");
+console.log("✅ mouse-main.js loaded");
 
 import { MouseTracker } from "./mouseTracker.js";
 import { createCheckBoxes } from "./checkboxGenerator.js";
