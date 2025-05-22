@@ -41,3 +41,5 @@ export function shuffleCheckBoxes(container) {
   result.all.forEach((box) => container.appendChild(box));
   return result.real;
 }
+
+

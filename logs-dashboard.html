@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Access Log Viewer</title>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
@@ -143,8 +144,21 @@
 
         const tr = document.createElement('tr');
         const status = row[statusIndex];
+
+        const inputTypeIndex = headers.indexOf("inputType");
+        const inputType = row[inputTypeIndex];
+
+
         if (status === "accepted") tr.style.backgroundColor = "#d4f7d4";
         if (status === "banned") tr.style.backgroundColor = "#f9d6d5";
+        
+        if (status === "accepted") {
+  tr.style.backgroundColor = inputType === "touch" ? "#d4f1f9" : "#d4f7d4"; // أزرق فاتح للمس، أخضر للماوس
+}
+if (status === "banned") {
+  tr.style.backgroundColor = inputType === "touch" ? "#fbe3e3" : "#fae6d0"; // وردي للمس، برتقالي باهت للماوس
+}
+
 
         row.forEach((cell, cellIndex) => {
           const td = document.createElement('td');

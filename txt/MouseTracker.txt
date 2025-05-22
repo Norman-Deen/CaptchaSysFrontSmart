@@ -1,124 +1,0 @@
-// 📁 MouseTracker.js
-// هذا الملف يحتوي على كائن مسؤول عن تتبع حركة الماوس وتحليل سلوك المستخدم.
-
-// ✅ إنشاء كائن تتبع الماوس
-export const MouseTracker = {
-  entryTime: null,           // وقت دخول الماوس إلى منطقة الكابتشا (لبداية التتبع)
-  speedLog: [],              // قائمة لحفظ سرعات الماوس أثناء الحركة
-  maxSpeed: 0,               // أعلى سرعة تم تسجيلها أثناء الحركة
-  suddenStopCount: 0,        // عدد التوقفات المفاجئة التي تم اكتشافها
-  trackingActive: false,     // هل التتبع نشط حاليًا أم لا
-
-  // ✅ تبدأ هذه الدالة عندما يدخل المستخدم إلى منطقة الكابتشا
-  startTracking(event) {
-    this.entryTime = Date.now();      // تسجيل وقت الدخول الحالي
-    this.speedLog = [];               // تفريغ قائمة السرعات السابقة
-    this.maxSpeed = 0;                // إعادة تعيين أعلى سرعة
-    this.suddenStopCount = 0;         // إعادة تعيين عداد التوقفات المفاجئة
-    this.trackingActive = true;       // تفعيل التتبع
-  },
-
-  // ✅ تُستدعى هذه الدالة عند كل حركة داخل الكابتشا
-  trackMovement(event) {
-    if (!this.trackingActive) return; // إذا لم يكن التتبع نشطًا، لا تفعل شيئًا
-
-    let dx = event.movementX; // التغير الأفقي في الموقع
-    let dy = event.movementY; // التغير العمودي في الموقع
-    let speed = Math.sqrt(dx * dx + dy * dy); // حساب السرعة اللحظية باستخدام فيثاغورس
-
-    // console.log("🟡 speed:", speed); // يمكن تفعيل هذا السطر لعرض كل السرعات
-
-    if (speed > 0.5) { // تجاهل الحركات الدقيقة جدًا (micro-movements)
-      this.speedLog.push(speed); // إضافة السرعة إلى قائمة التسجيل
-
-      if (speed > this.maxSpeed) this.maxSpeed = speed; // تحديث أعلى سرعة عند اللزوم
-
-      // ✅ اكتشاف التوقف المفاجئ: إذا كانت السرعة السابقة عالية والحالية شبه صفر
-      if (
-        this.speedLog.length > 1 &&
-        this.speedLog[this.speedLog.length - 2] > 0.8 &&
-        speed < 0.1
-      ) {
-        this.suddenStopCount++; // زيادة عداد التوقف المفاجئ
-      }
-
-      if (this.speedLog.length > 10) this.speedLog.shift(); // احتفظ بآخر 10 سرعات فقط
-    }
-  },
-
-  // ✅ تُستدعى عند النقر لتحليل السلوك وتوليد تقرير JSON
-  handleClick(event) {
-    if (!this.trackingActive || this.speedLog.length < 5) return null;
-    // إذا لم يكن التتبع نشطًا أو البيانات غير كافية، لا تُكمل
-
-    let clickTime = Date.now(); // وقت النقر
-    let movementTime = clickTime - this.entryTime; // الزمن الذي استغرقه التفاعل
-
-    let lastSpeed = this.speedLog.at(-1) || 0; // آخر سرعة مسجلة قبل النقر
-
-    // ✅ حساب معدل التباطؤ: هل الماوس تباطأ بشكل طبيعي قبل النقر؟
-    let lastSpeeds = this.speedLog.slice(-5);
-    let avgLastSpeed =
-      lastSpeeds.length > 0
-        ? lastSpeeds.reduce((a, b) => a + b, 0) / lastSpeeds.length
-        : 0;
-
-    let decelerationRate =
-      avgLastSpeed > 0 ? (avgLastSpeed - lastSpeed) / avgLastSpeed : 0;
-
-    decelerationRate = Math.max(0, parseFloat(decelerationRate.toFixed(2)));
-    // التأكد من أن النتيجة غير سالبة وتحديدها لأقرب رقم عشريَين
-
-    // ✅ تحليل استقرار السرعة: هل السرعة كانت ثابتة أم متذبذبة؟
-    let meanSpeed =
-      this.speedLog.length > 0
-        ? this.speedLog.reduce((a, b) => a + b, 0) / this.speedLog.length
-        : 0;
-
-    let variance =
-      this.speedLog.length > 1
-        ? this.speedLog.reduce(
-            (sum, s) => sum + Math.pow(s - meanSpeed, 2),
-            0
-          ) / this.speedLog.length
-        : 0;
-
-    let speedStability = parseFloat(Math.sqrt(variance).toFixed(2));
-    // حساب الانحراف المعياري للسرعة لمعرفة مدى تذبذبها
-
-    // ✅ تصنيف نمط الحركة بناءً على استقرار السرعة
-    let movementPattern = "normal";
-    if (speedStability < 0.1) movementPattern = "too stable"; // ربما روبوت
-    else if (speedStability > 2.0) movementPattern = "chaotic"; // حركة غير بشرية
-
-    let behaviorType = "human"; // الافتراضي هو أن السلوك بشري
-
-    // ✅ نظام تسجيل الشك في السلوك
-    let suspiciousScore = 0;
-    if (movementTime < 200) suspiciousScore++; // زمن قصير جدًا
-    if (speedStability < 0.1) suspiciousScore++; // استقرار مبالغ فيه
-    if (decelerationRate < 0.2) suspiciousScore++; // لم يبطئ الماوس قبل النقر
-    if (this.suddenStopCount > 3) suspiciousScore++; // عدد كبير من التوقفات المفاجئة
-
-    if (suspiciousScore >= 2) {
-      behaviorType = "robot"; // إذا اجتمع أكثر من مؤشر، نشتبه بأنه روبوت
-    }
-
-    // ✅ إنشاء كائن JSON يحتوي على النتائج النهائية
-    let jsonData = {
-      maxSpeed: parseFloat(this.maxSpeed.toFixed(2)), // أعلى سرعة
-      lastSpeed: parseFloat(lastSpeed.toFixed(2)),    // السرعة الأخيرة
-      speedStability,                                // درجة استقرار السرعة
-      movementTime,                                  // زمن التفاعل
-      // behaviorType, // يمكنك تفعيله إذا كنت تريد إرساله أيضًا
-      pageUrl: window.location.href,                 // عنوان الصفحة
-      userAgent: navigator.userAgent,                // المتصفح المستخدم
-      speedSeries: this.speedLog.slice(-10),         // آخر 10 سرعات مسجلة
-    };
-
-    this.trackingActive = false; // إيقاف التتبع بعد النقر
-    this.speedLog = [];          // إعادة تعيين قائمة السرعات
-
-    return jsonData; // إعادة التقرير الكامل
-  },
-};

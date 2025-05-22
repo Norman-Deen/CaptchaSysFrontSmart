@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analytics Dashboard</title>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -40,21 +42,19 @@
   <button onclick="loadCharts()">Refresh</button>
 
   <canvas id="behaviorChartCanvas"></canvas>
+  <canvas id="inputTypeChartCanvas"></canvas>
   <canvas id="statusChartCanvas"></canvas>
 
   <script>
-    let behaviorChart, statusChart;
+    let behaviorChart, statusChart, inputTypeChart;
 
     function loadCharts() {
-const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+      const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+      const API_URL = isLocal
+        ? "http://localhost:8080/api/log"
+        : "https://captchasysbacksmart.onrender.com/api/log";
 
-const API_URL = isLocal
-  ? "http://localhost:8080/api/log"
-  : "https://captchasysbacksmart.onrender.com/api/log";
-
-
-fetch(API_URL)
-
+      fetch(API_URL)
         .then(res => res.json())
         .then(lines => {
           if (lines.length < 2) return;
@@ -62,27 +62,31 @@ fetch(API_URL)
           const headers = lines[0].split(",");
           const behaviorIndex = headers.indexOf("behaviorType");
           const statusIndex = headers.indexOf("status");
+          const inputTypeIndex = headers.indexOf("inputType");
 
           let behaviorCounts = { human: 0, robot: 0 };
           let statusCounts = { accepted: 0, banned: 0 };
+          let inputTypeCounts = { mouse: 0, touch: 0 };
 
           for (let i = 1; i < lines.length; i++) {
-            const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val =>
-              val.replace(/^"|"$/g, "").trim()
-            );
+            const row = lines[i]
+              .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+              .map(val => val.replace(/^"|"$/g, "").trim());
 
             const behavior = row[behaviorIndex];
             const status = row[statusIndex];
+            const inputType = row[inputTypeIndex];
 
             if (behaviorCounts[behavior] !== undefined) behaviorCounts[behavior]++;
             if (statusCounts[status] !== undefined) statusCounts[status]++;
+            if (inputTypeCounts[inputType] !== undefined) inputTypeCounts[inputType]++;
           }
 
-          // Destroy old charts if they exist
           if (behaviorChart) behaviorChart.destroy();
           if (statusChart) statusChart.destroy();
+          if (inputTypeChart) inputTypeChart.destroy();
 
-          // Pie Chart: Human vs Robot
+          // 1️⃣ Human vs Robot
           behaviorChart = new Chart(document.getElementById("behaviorChartCanvas"), {
             type: "pie",
             data: {
@@ -92,8 +96,18 @@ fetch(API_URL)
                 backgroundColor: ["#28a745", "#dc3545"]
               }]
             },
+            plugins: [ChartDataLabels],
             options: {
               plugins: {
+                datalabels: {
+                  formatter: (value, ctx) => {
+                    const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    const percentage = (value / total * 100).toFixed(1);
+                    return `${value} (${percentage}%)`;
+                  },
+                  color: "#fff",
+                  font: { weight: "bold" }
+                },
                 title: {
                   display: true,
                   text: "Human vs Robot"
@@ -105,7 +119,40 @@ fetch(API_URL)
             }
           });
 
-          // Bar Chart: Accepted vs Banned
+          // 2️⃣ Mouse vs Touch
+          inputTypeChart = new Chart(document.getElementById("inputTypeChartCanvas"), {
+            type: "pie",
+            data: {
+              labels: ["Mouse", "Touch"],
+              datasets: [{
+                data: [inputTypeCounts.mouse, inputTypeCounts.touch],
+                backgroundColor: ["#6f42c1", "#20c997"]
+              }]
+            },
+            plugins: [ChartDataLabels],
+            options: {
+              plugins: {
+                datalabels: {
+                  formatter: (value, ctx) => {
+                    const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    const percentage = (value / total * 100).toFixed(1);
+                    return `${value} (${percentage}%)`;
+                  },
+                  color: "#fff",
+                  font: { weight: "bold" }
+                },
+                title: {
+                  display: true,
+                  text: "Input Type Distribution"
+                },
+                legend: {
+                  position: "bottom"
+                }
+              }
+            }
+          });
+
+          // 3️⃣ Accepted vs Banned
           statusChart = new Chart(document.getElementById("statusChartCanvas"), {
             type: "bar",
             data: {
@@ -140,7 +187,6 @@ fetch(API_URL)
         });
     }
 
-    // Load on page load
     window.onload = loadCharts;
   </script>
 

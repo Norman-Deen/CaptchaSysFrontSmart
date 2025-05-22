@@ -1,50 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CaptchaSys</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
 </head>
 
 <body>
 
   <!-- Buttons -->
   <div class="button-group">
-    <button class="log-button" onclick="window.open('logs-dashboard.html', '_blank')">
-      View Log
-    </button>
-    <button class="toggle-fake-button" onclick="toggleFakeBoxes()">
-      Toggle Fake Boxes
-    </button>
-    <button class="analytics-button" onclick="window.open('analytics-dashboard.html', '_blank')">
-      Analytics
-    </button>
-    <button class="refresh-button" onclick="location.reload()">
-      Refresh
-    </button>
+    <button class="log-button" onclick="window.open('logs-dashboard.html', '_blank')">View Log</button>
+    <button class="toggle-fake-button" onclick="toggleFakeBoxes()">Toggle Fake Boxes</button>
+    <button class="analytics-button" onclick="window.open('analytics-dashboard.html', '_blank')">Analytics</button>
+    <button class="refresh-button" onclick="location.reload()">Refresh</button>
   </div>
-
-
 
   <div class="captcha-box">
-
     <img src="images/RecaptchaLogo.svg.png" alt="reCAPTCHA Logo" class="captcha-logo" />
 
-    <div class="checkbox-with-text">
-      <div id="checkbox-container"></div>
-      <div id="captcha-static-label" class="captcha-label">I am human</div>
+    <!-- ✅ ماوس -->
+    <div id="mouse-captcha" style="display: none;">
+      <div class="checkbox-with-text">
+        <div id="checkbox-container"></div>
+        <div id="captcha-static-label" class="captcha-label">I am human</div>
+      </div>
     </div>
 
+    <!-- ✅ لمس -->
+    <div id="touch-captcha" style="display: none;">
+      <div class="slider-wrapper">
+        <div id="slider-track">
+          <div id="slider-handle"></div>
+        </div>
+        <div id="slider-label" class="captcha-label">Slide to verify</div>
+      </div>
+    </div>
   </div>
 
+  <!-- Auto-switch based on device -->
+  <script type="module">
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-
-
-
-  <script type="module" src="js/main.js"></script>
-
+    if (isTouch) {
+      document.getElementById("touch-captcha").style.display = "block";
+      import("./js/touch-main.js");
+    } else {
+      document.getElementById("mouse-captcha").style.display = "block";
+      import("./js/Mouse-main.js");
+    }
+  </script>
 </body>
-
 </html>
