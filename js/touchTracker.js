@@ -1,12 +1,13 @@
-// 📁 TouchTracker.js
+// TouchTracker.js
 
 export const TouchTracker = {
+  // Analyze user touch behavior and classify as "human" or "robot"
   analyze({ duration, verticalMovements, totalDisplacementY, speedSeries }) {
     const avgSpeed = this.getAverage(speedSeries);
     const stdSpeed = this.getStd(speedSeries, avgSpeed);
     const verticalCount = verticalMovements?.length || 0;
 
-    // ⚡ تحليل تغيّر السرعة (التسارع)
+    // Analyze acceleration changes: how often speed direction shifts
     let accelerationChanges = 0;
     for (let i = 2; i < speedSeries.length; i++) {
       const prev = speedSeries[i - 1] - speedSeries[i - 2];
@@ -15,8 +16,8 @@ export const TouchTracker = {
         accelerationChanges++;
       }
     }
-    //console.log("🔁 Acceleration changes:", accelerationChanges);
 
+    // Evaluate suspicious indicators
     let suspiciousScore = 0;
     let reasons = [];
 
@@ -50,8 +51,10 @@ export const TouchTracker = {
       reasons.push("Not enough acceleration variation");
     }
 
+    // Final classification
     const behaviorType = suspiciousScore >= 2 ? "robot" : "human";
 
+    // Return the result object
     return {
       behaviorType,
       suspiciousScore,
@@ -62,19 +65,21 @@ export const TouchTracker = {
       accelerationChanges,
       verticalCount,
       totalDisplacementY: parseFloat(totalDisplacementY.toFixed(2)),
-      speedSeries: speedSeries.slice(-10),
+      speedSeries: speedSeries.slice(-10), // only keep recent movements
       pageUrl: window.location.href,
       userAgent: navigator.userAgent,
 
-      verticalMovements, // أضف هذا السطر فقط
+      verticalMovements, // needed for scoring and feedback
     };
   },
 
+  // Calculate average of array
   getAverage(arr) {
     if (!arr || arr.length === 0) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   },
 
+  // Calculate standard deviation of array
   getStd(arr, mean) {
     if (!arr || arr.length === 0) return 0;
     const variance =

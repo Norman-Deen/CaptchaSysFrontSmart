@@ -1,42 +1,40 @@
-// 📁 MouseTracker.js
-
-
+// MouseTracker.js
 
 /* Mouse movement tracking object for CAPTCHA interaction */
 export const MouseTracker = {
   // General state variables
-  entryTime: null,           // Time when the mouse entered the box
-  speedLog: [],              // Recent speed values
-  maxSpeed: 0,               // Highest speed recorded
-  suddenStopCount: 0,        // Number of sudden stops detected
-  trackingActive: false,     // Whether tracking is currently active
+  entryTime: null,           // Timestamp when the user entered the CAPTCHA box
+  speedLog: [],              // Stores recent speed values of the mouse
+  maxSpeed: 0,               // Maximum speed reached during tracking
+  suddenStopCount: 0,       // Counts how many sudden stops the user made
+  trackingActive: false,    // Whether tracking is currently active
 
-  // Triggered when user enters the box
+  // Called when the user enters the CAPTCHA area
   startTracking(event) {
-    this.entryTime = Date.now(); // Record entry time
-    this.speedLog = [];          // Reset speed log
+    this.entryTime = Date.now();  // Start time
+    this.speedLog = [];           // Clear previous speeds
     this.maxSpeed = 0;
     this.suddenStopCount = 0;
     this.trackingActive = true;
   },
 
-  // Triggered on every mouse movement inside the box
+  // Called on every mouse movement while inside the CAPTCHA area
   trackMovement(event) {
     if (!this.trackingActive) return;
 
     let dx = event.movementX;
     let dy = event.movementY;
-    let speed = Math.sqrt(dx * dx + dy * dy); // Instantaneous speed
+    let speed = Math.sqrt(dx * dx + dy * dy); // Calculate instantaneous speed
 
-         //    console.log("🟡 speed:", speed);   // all speed record
+                     // Optional log (commented): console.log("speed:", speed);
 
     if (speed > 0.5) {
-      // Ignore very small micro-movements
+      // Filter out small, meaningless movements
       this.speedLog.push(speed);
 
       if (speed > this.maxSpeed) this.maxSpeed = speed;
 
-      // Detect sudden stop (from high to low)
+      // Check if there was a sudden drop in speed
       if (
         this.speedLog.length > 1 &&
         this.speedLog[this.speedLog.length - 2] > 0.8 &&
@@ -45,12 +43,12 @@ export const MouseTracker = {
         this.suddenStopCount++;
       }
 
-      // Keep only the last 10 speeds
+      // Limit the log to last 10 movements
       if (this.speedLog.length > 10) this.speedLog.shift();
     }
   },
 
-  // Called on click to analyze movement data
+  // Called when the user clicks inside the CAPTCHA
   handleClick(event) {
     if (!this.trackingActive || this.speedLog.length < 5) return null;
 
@@ -59,7 +57,7 @@ export const MouseTracker = {
 
     let lastSpeed = this.speedLog.at(-1) || 0;
 
-    // Deceleration calculation
+    // Calculate deceleration rate from recent speeds
     let lastSpeeds = this.speedLog.slice(-5);
     let avgLastSpeed =
       lastSpeeds.length > 0
@@ -68,10 +66,9 @@ export const MouseTracker = {
 
     let decelerationRate =
       avgLastSpeed > 0 ? (avgLastSpeed - lastSpeed) / avgLastSpeed : 0;
-
     decelerationRate = Math.max(0, parseFloat(decelerationRate.toFixed(2)));
 
-    // Speed consistency analysis
+    // Calculate speed variance (for stability analysis)
     let meanSpeed =
       this.speedLog.length > 0
         ? this.speedLog.reduce((a, b) => a + b, 0) / this.speedLog.length
@@ -79,23 +76,20 @@ export const MouseTracker = {
 
     let variance =
       this.speedLog.length > 1
-        ? this.speedLog.reduce(
-            (sum, s) => sum + Math.pow(s - meanSpeed, 2),
-            0
-          ) / this.speedLog.length
+        ? this.speedLog.reduce((sum, s) => sum + Math.pow(s - meanSpeed, 2), 0) / this.speedLog.length
         : 0;
 
     let speedStability = parseFloat(Math.sqrt(variance).toFixed(2));
 
-    // Movement pattern classification
+    // Analyze movement pattern
     let movementPattern = "normal";
     if (speedStability < 0.1) movementPattern = "too stable";
     else if (speedStability > 2.0) movementPattern = "chaotic";
 
-    // Default behavior type
+    // Default behavior classification
     let behaviorType = "human";
 
-    // Suspicion logic
+    // Evaluate how suspicious the behavior is
     let suspiciousScore = 0;
     if (movementTime < 200) suspiciousScore++;
     if (speedStability < 0.1) suspiciousScore++;
@@ -106,13 +100,13 @@ export const MouseTracker = {
       behaviorType = "robot";
     }
 
-    // Final result object
+    // Construct the final output object
     let jsonData = {
       maxSpeed: parseFloat(this.maxSpeed.toFixed(2)),
       lastSpeed: parseFloat(lastSpeed.toFixed(2)),
       speedStability,
       movementTime,
-      // behaviorType, // You can include this field if needed
+      // behaviorType, // Uncomment if backend expects it
       pageUrl: window.location.href,
       userAgent: navigator.userAgent,
       speedSeries: this.speedLog.slice(-10),
@@ -124,9 +118,3 @@ export const MouseTracker = {
     return jsonData;
   },
 };
-
-
-
-
-
-//test

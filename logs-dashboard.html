@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <title>Access Log Viewer</title>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
@@ -13,7 +12,6 @@
       padding: 20px;
       background: #f4f4f4;
     }
-
     .button-row button {
       font-size: 24px;
       padding: 20px;
@@ -21,41 +19,32 @@
       border-radius: 6px;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-
     .button-row button:hover {
       cursor: pointer;
       background-color: #ccc;
       color: #000;
     }
-
-
     table {
       width: 100%;
       border-collapse: collapse;
       background: white;
     }
-
-    th,
-    td {
+    th, td {
       padding: 10px;
       border: 1px solid #ccc;
       text-align: left;
     }
-
     th {
       background: #eee;
     }
-
     td {
       font-size: 14px;
     }
-
     .button-row {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
     }
-
     td button {
       background: none;
       border: none;
@@ -64,16 +53,24 @@
       font-size: 18px;
       color: #444;
     }
-
     td button:hover {
       color: red;
     }
 
-    .refresh-btn {
-      flex: 9;
-      font-size: 24px;
-      padding: 20px;
-    }
+
+   .refresh-btn {
+  flex: 9;
+  font-size: 24px;
+  padding: 20px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.refresh-btn:hover {
+  background-color: #27ae60;
+}
 
     .deleteAll-btn {
       flex: 1;
@@ -84,163 +81,176 @@
       border: none;
       cursor: pointer;
     }
-
     .deleteAll-btn:hover {
       background-color: #e74c3c;
     }
+
+      .technical-column.hidden {
+    display: none;
+  }
+
   </style>
 </head>
-
 <body>
-  <div class="button-row">
-    <button class="refresh-btn" onclick="loadLog()">Refresh</button>
-    <button class="deleteAll-btn" onclick="deleteAll()">Delete All</button>
-  </div>
 
+  <!-- Button section at the top -->
+  <div class="button-row">
+  <button class="refresh-btn" onclick="loadLog()">Refresh</button>
+  <button class="deleteAll-btn" style="background-color:#2980b9" onclick="toggleDetails()">Details</button>
+  <button class="deleteAll-btn" onclick="deleteAll()">Delete All</button>
+</div>
 
   <table id="logTable">
-    <thead>
-      <tr id="tableHeader"></tr>
-    </thead>
+    <thead><tr id="tableHeader"></tr></thead>
     <tbody></tbody>
   </table>
 
-  <script>
-    const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-    const API_URL = isLocal
-      ? "http://localhost:8080/api/log"
-      : "https://captchasysbacksmart.onrender.com/api/log";
+<script>
+  // Determine if the current environment is local
+  const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
 
+  // Set the API endpoint based on the environment (local or production)
+  const API_URL = isLocal
+    ? "http://localhost:8080/api/log"
+    : "https://captchasysbacksmart.onrender.com/api/log";
 
-    async function loadLog() {
-      const res = await fetch(API_URL);
-      const lines = await res.json();
+  // Define which columns are considered technical and can be hidden from the UI
+  const hiddenColumns = [
+    "verticalScore", "verticalCount", "totalVerticalMovement", "avgSpeed", "stdSpeed", "accelerationChanges",
+    "maxSpeed", "lastSpeed", "speedStability", "movementTime", "speedSeries", "decelerationRate",
+    "speedVariance", "mlScore", "boxIndexes"
+  ];
 
-      const tbody = document.querySelector('#logTable tbody');
-      const headerRow = document.querySelector('#tableHeader');
+  let hideDetails = true;
 
-      tbody.innerHTML = '';
-      headerRow.innerHTML = '';
+  // Toggles visibility of technical columns
+  function toggleDetails() {
+    hideDetails = !hideDetails;
+    document.querySelectorAll('.technical-column').forEach(col => {
+      col.classList.toggle('hidden', hideDetails);
+    });
+  }
 
-      if (lines.length === 0) return;
+  // Fetches the log from the backend and renders it in a table
+  async function loadLog() {
+    const res = await fetch(API_URL);
+    const lines = await res.json();
 
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
-      headers.push("Action");
+    const tbody = document.querySelector('#logTable tbody');
+    const headerRow = document.querySelector('#tableHeader');
 
-      headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-      });
+    tbody.innerHTML = '';
+    headerRow.innerHTML = '';
+
+    if (lines.length === 0) return;
+
+    // Parse header row from CSV
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+    headers.unshift("No.");
+    headers.push("Action");
+
+    // Create table headers
+    headers.forEach(header => {
+      const th = document.createElement('th');
+      th.textContent = header;
+      if (hiddenColumns.includes(header)) th.classList.add('technical-column');
+      if (hideDetails && hiddenColumns.includes(header)) th.classList.add('hidden');
+      headerRow.appendChild(th);
+    });
+
+    // Loop through data rows
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val =>
+        val.replace(/^"|"$/g, '').replace(/""/g, '"')
+      );
+
+      while (row.length < headers.length - 2) row.push("");
+
+      const tr = document.createElement('tr');
+      row.unshift(i.toString());
 
       const statusIndex = headers.indexOf("status");
+      const inputTypeIndex = headers.indexOf("inputType");
+      const status = row[statusIndex];
+      const inputType = row[inputTypeIndex];
 
-      for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val =>
-          val.replace(/^"|"$/g, '').replace(/""/g, '"')
-        );
-
-        while (row.length < headers.length - 1) row.push("");
-
-        const tr = document.createElement('tr');
-        const status = row[statusIndex];
-
-        const inputTypeIndex = headers.indexOf("inputType");
-        const inputType = row[inputTypeIndex];
-
-
-        if (status === "accepted") tr.style.backgroundColor = "#d4f7d4";
-        if (status === "banned") tr.style.backgroundColor = "#f9d6d5";
-        
-        if (status === "accepted") {
-  tr.style.backgroundColor = inputType === "touch" ? "#d4f1f9" : "#d4f7d4"; // أزرق فاتح للمس، أخضر للماوس
-}
-if (status === "banned") {
-  tr.style.backgroundColor = inputType === "touch" ? "#fbe3e3" : "#fae6d0"; // وردي للمس، برتقالي باهت للماوس
-}
-
-
-        row.forEach((cell, cellIndex) => {
-          const td = document.createElement('td');
-
-          // Simplify timestamp
-          if (headers.indexOf("timestamp") === cellIndex && cell) {
-            const date = new Date(cell);
-            td.textContent =
-              date.toLocaleDateString('en-GB') + " " +
-              date.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-
-            // Simplify userAgent
-          } else if (headers.indexOf("userAgent") === cellIndex && cell) {
-            let result = "";
-            if (cell.includes("Windows NT 10.0")) result += "Windows 10 – ";
-            else if (cell.includes("Windows NT 11.0")) result += "Windows 11 – ";
-            else if (cell.includes("Android")) result += "Android – ";
-            else if (cell.includes("iPhone")) result += "iPhone – ";
-            else if (cell.includes("Mac")) result += "Mac – ";
-
-            const match = cell.match(/Chrome\/([\d\.]+)/);
-            if (match) result += "Chrome " + match[1].split('.')[0];
-            else if (cell.includes("Firefox")) result += "Firefox";
-            else if (cell.includes("Safari") && !cell.includes("Chrome")) result += "Safari";
-
-            td.textContent = result || cell;
-
-
-
-          } else if (headers.indexOf("ip") === cellIndex && cell) {
-            td.textContent = cell.replace(/^::ffff:/, '');
-          } else {
-            td.textContent = cell;
-          }
-
-          tr.appendChild(td);
-        });
-
-        const actionCell = document.createElement('td');
-        const delButton = document.createElement('button');
-
-        delButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-
-
-        delButton.onclick = async () => {
-          await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
-          loadLog();
-        };
-
-        actionCell.appendChild(delButton);
-        tr.appendChild(actionCell);
-
-
-        tbody.appendChild(tr);
+      // Conditional row coloring based on status and input type
+      if (status === "accepted") {
+        tr.style.backgroundColor = inputType === "touch" ? "#d4f1f9" : "#d4f7d4";
       }
-    }
+      if (status === "banned") {
+        tr.style.backgroundColor = inputType === "touch" ? "#fbe3e3" : "#fae6d0";
+      }
 
+      // Render each cell
+      row.forEach((cell, cellIndex) => {
+        const td = document.createElement('td');
+        const colName = headers[cellIndex];
 
-    async function deleteAll() {
-      const res = await fetch(API_URL);
-      const lines = await res.json();
-      for (let i = lines.length - 1; i > 0; i--) {
-        try {
-          await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
-        } catch (err) {
-          console.warn(`❌ Failed to delete row ${i}:`, err);
+        if (hiddenColumns.includes(colName)) td.classList.add('technical-column');
+        if (hideDetails && hiddenColumns.includes(colName)) td.classList.add('hidden');
+
+        // Format specific columns
+        if (headers.indexOf("timestamp") === cellIndex && cell) {
+          const date = new Date(cell);
+          td.textContent = date.toLocaleDateString('en-GB') + " " +
+            date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        } else if (headers.indexOf("userAgent") === cellIndex && cell) {
+          let result = "";
+          if (cell.includes("Windows NT 10.0")) result += "Windows 10 – ";
+          else if (cell.includes("Windows NT 11.0")) result += "Windows 11 – ";
+          else if (cell.includes("Android")) result += "Android – ";
+          else if (cell.includes("iPhone")) result += "iPhone – ";
+          else if (cell.includes("Mac")) result += "Mac – ";
+
+          const match = cell.match(/Chrome\/([\d\.]+)/);
+          if (match) result += "Chrome " + match[1].split('.')[0];
+          else if (cell.includes("Firefox")) result += "Firefox";
+          else if (cell.includes("Safari") && !cell.includes("Chrome")) result += "Safari";
+
+          td.textContent = result || cell;
+        } else if (headers.indexOf("ip") === cellIndex && cell) {
+          td.textContent = cell.replace(/^::ffff:/, '');
+        } else {
+          td.textContent = cell;
         }
-      }
 
-      loadLog();
+        tr.appendChild(td);
+      });
+
+      // Add delete button for each row
+      const actionCell = document.createElement('td');
+      const delButton = document.createElement('button');
+      delButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      delButton.onclick = async () => {
+        await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
+        loadLog();
+      };
+      actionCell.appendChild(delButton);
+      tr.appendChild(actionCell);
+
+      tbody.appendChild(tr);
     }
+  }
+
+  // Deletes all log entries except the header
+  async function deleteAll() {
+    const res = await fetch(API_URL);
+    const lines = await res.json();
+    for (let i = lines.length - 1; i > 0; i--) {
+      try {
+        await fetch(`${API_URL}/${i}`, { method: 'DELETE' });
+      } catch (err) {
+        console.warn(`Failed to delete row ${i}:`, err);
+      }
+    }
+    loadLog();
+  }
+
+  // Load log entries when the page loads
+  window.onload = loadLog;
+</script>
 
 
-
-
-
-
-    window.onload = loadLog;
-  </script>
 </body>
-
 </html>

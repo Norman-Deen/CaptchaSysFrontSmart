@@ -10,7 +10,7 @@
 
 <body>
 
-  <!-- Buttons -->
+  <!-- Top control buttons -->
   <div class="button-group">
     <button class="log-button" onclick="window.open('logs-dashboard.html', '_blank')">View Log</button>
     <button class="toggle-fake-button" onclick="toggleFakeBoxes()">Toggle Fake Boxes</button>
@@ -21,7 +21,7 @@
   <div class="captcha-box">
     <img src="images/RecaptchaLogo.svg.png" alt="reCAPTCHA Logo" class="captcha-logo" />
 
-    <!-- ✅ ماوس -->
+    <!-- Mouse-based CAPTCHA -->
     <div id="mouse-captcha" style="display: none;">
       <div class="checkbox-with-text">
         <div id="checkbox-container"></div>
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <!-- ✅ لمس -->
+    <!-- Touch-based CAPTCHA -->
     <div id="touch-captcha" style="display: none;">
       <div class="slider-wrapper">
         <div id="slider-track">
@@ -40,7 +40,7 @@
     </div>
   </div>
 
-  <!-- Auto-switch based on device -->
+  <!-- Automatically detect device type and load appropriate CAPTCHA -->
   <script type="module">
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 

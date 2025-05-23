@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analytics Dashboard</title>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <style>
@@ -86,7 +86,7 @@
           if (statusChart) statusChart.destroy();
           if (inputTypeChart) inputTypeChart.destroy();
 
-          // 1️⃣ Human vs Robot
+          // Chart 1: Human vs Robot
           behaviorChart = new Chart(document.getElementById("behaviorChartCanvas"), {
             type: "pie",
             data: {
@@ -119,7 +119,7 @@
             }
           });
 
-          // 2️⃣ Mouse vs Touch
+          // Chart 2: Input Type (Mouse vs Touch)
           inputTypeChart = new Chart(document.getElementById("inputTypeChartCanvas"), {
             type: "pie",
             data: {
@@ -152,7 +152,7 @@
             }
           });
 
-          // 3️⃣ Accepted vs Banned
+          // Chart 3: Accepted vs Banned
           statusChart = new Chart(document.getElementById("statusChartCanvas"), {
             type: "bar",
             data: {

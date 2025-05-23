@@ -1,5 +1,5 @@
-// 📁 Mouse-main.js
-console.log("✅ mouse-main.js loaded");
+// mouse-main.js
+console.log("mouse-main.js loaded successfully");
 
 import { MouseTracker } from "./mouseTracker.js";
 import { createCheckBoxes } from "./checkboxGenerator.js";
@@ -12,8 +12,10 @@ import {
   disableCaptcha,
   startBanTimer,
 } from "./Service.js";
+
 window.toggleFakeBoxes = toggleFakeBoxes;
 
+// State object to keep track of current interaction session
 const CaptchaState = {
   realCheckbox: null,
   allowClick: false,
@@ -27,6 +29,7 @@ const CaptchaState = {
   },
 };
 
+// Initialize a new set of checkboxes and handle visibility delay
 function setupCaptcha() {
   const checkboxContainer = document.getElementById("checkbox-container");
   const label = document.getElementById("captcha-static-label");
@@ -44,7 +47,7 @@ function setupCaptcha() {
   const delay = 500 + Math.random() * 1000;
   setTimeout(() => {
     CaptchaState.allowClick = true;
-    console.log(`🟢 Click allowed after ${Math.round(delay)}ms`);
+    console.log(`Click allowed after ${Math.round(delay)}ms`);
     if (label) label.style.visibility = "visible";
     if (checkboxContainer) checkboxContainer.style.visibility = "visible";
   }, delay);
@@ -53,21 +56,20 @@ function setupCaptcha() {
   window.fakeBoxes.forEach((box) => (box.style.display = "none"));
 }
 
+// Handle user clicking on a fake checkbox
 function handleFakeClick(event) {
   event.preventDefault();
   const checkboxContainer = document.getElementById("checkbox-container");
   CaptchaState.fakeClickCount++;
 
-  const boxIndex = [...checkboxContainer.querySelectorAll("input")].indexOf(
-    event.target
-  );
+  const boxIndex = [...checkboxContainer.querySelectorAll("input")].indexOf(event.target);
   CaptchaState.fakeBoxIndexes.push(boxIndex);
 
   if (CaptchaState.fakeClickCount === 1) {
-    console.log("⚠️ First Fail");
+    console.log("First failed attempt");
     setupCaptcha();
   } else if (CaptchaState.fakeClickCount === 2) {
-    console.log("⚠️ Second Fail: Banned for 2 Sec");
+    console.log("Second failed attempt: temporary ban for 2 seconds");
     document.getElementById("captcha-static-label").style.display = "none";
     startBanTimer(2, () => {
       setTimeout(() => {
@@ -78,14 +80,15 @@ function handleFakeClick(event) {
       }, 1000);
     });
   } else if (CaptchaState.fakeClickCount >= 3) {
-    console.log("⚠️ Third Fail: Banned!");
+    console.log("Third failed attempt: permanently banned");
     disableCaptcha();
     checkboxContainer.innerHTML = `
       <div style="color: red; font-size: 20px; font-weight: bold;">
-        🚫 You have been banned.
+        You have been banned.
       </div>`;
     const label = document.getElementById("captcha-static-label");
     if (label) label.style.display = "none";
+
     const report = {
       mode: "robot-detected",
       reason: "Three fake clicks detected",
@@ -94,14 +97,17 @@ function handleFakeClick(event) {
       boxIndexes: CaptchaState.fakeBoxIndexes,
       pageUrl: window.location.href,
     };
+
     sendToBackendData("mouse", report).catch((err) => {
       console.warn("Backend unreachable:", err.message);
     });
+
     CaptchaState.fakeClickCount = 0;
     CaptchaState.fakeBoxIndexes = [];
   }
 }
 
+// Main function to start and manage CAPTCHA behavior
 function startCaptchaCode() {
   const checkboxContainer = document.getElementById("checkbox-container");
   const captchaBox = document.querySelector(".captcha-box");
@@ -109,6 +115,7 @@ function startCaptchaCode() {
 
   if (label) label.textContent = "I am human";
 
+  // Detect mouse movement to validate user activity
   document.addEventListener("mousemove", (event) => {
     if (Math.abs(event.movementX) > 1 || Math.abs(event.movementY) > 1) {
       CaptchaState.userInteraction.mouseMoved = true;
@@ -118,9 +125,9 @@ function startCaptchaCode() {
   setupCaptcha();
 
   checkboxContainer.addEventListener("click", async (event) => {
-    // 🔒 Enable real-user click protection
+    // Block clicks from scripts or automated tools
     if (!event.isTrusted) {
-      console.warn("Untrusted click blocked (likely from a script).");
+      console.warn("Untrusted click blocked.");
       return;
     }
 
@@ -142,7 +149,7 @@ function startCaptchaCode() {
       !CaptchaState.userInteraction.mouseMoved ||
       distance < 10
     ) {
-      console.warn("⚠️ Suspicious click attempt");
+      console.warn("Suspicious click attempt");
       return handleFakeClick(event);
     }
 
@@ -152,13 +159,13 @@ function startCaptchaCode() {
       const diffY = Math.abs(clickY - (rect.top + rect.height / 2));
 
       if (diffX < 0.3 && diffY < 0.3) {
-        console.warn("🤖 Click was too perfect, suspicious");
+        console.warn("Click too perfect, likely automated");
         return handleFakeClick(event);
       }
 
       const data = MouseTracker.handleClick(event);
       if (!data || !data.speedSeries || data.speedSeries.length < 5) {
-        console.warn("⛔ Ignored incomplete or invalid data.");
+        console.warn("Incomplete or invalid data ignored");
         return;
       }
 
@@ -168,7 +175,7 @@ function startCaptchaCode() {
       if (result?.status === "banned") {
         checkboxContainer.innerHTML = `
           <div style="color: red; font-size: 20px; font-weight: bold;">
-            🚫 Access denied. You have been permanently banned.
+            Access denied. You have been permanently banned.
           </div>`;
         document.getElementById("captcha-static-label").style.display = "none";
         return;
@@ -178,7 +185,7 @@ function startCaptchaCode() {
         document.getElementById("captcha-static-label").style.display = "none";
         checkboxContainer.innerHTML = `
           <div style="color: green; font-size: 20px; font-weight: bold;">
-            ✅ Success!
+            Success!
           </div>`;
         CaptchaState.fakeClickCount = 0;
         CaptchaState.fakeBoxIndexes = [];
@@ -202,6 +209,7 @@ function startCaptchaCode() {
   }
 }
 
+// Wait until all CAPTCHA elements are rendered before initializing logic
 function waitUntilVisible() {
   const container = document.getElementById("checkbox-container");
   const label = document.getElementById("captcha-static-label");
@@ -211,7 +219,6 @@ function waitUntilVisible() {
     return;
   }
 
-  // console.log("✅ Elements ready, initializing Mouse Captcha...");
   startCaptchaCode();
 }
 

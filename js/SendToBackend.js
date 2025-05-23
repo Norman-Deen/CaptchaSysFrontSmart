@@ -1,22 +1,22 @@
-// 📁 SendToBackend.js
+// SendToBackend.js
 
-// ✅ تحديد إذا كنا على بيئة محلية أو نشر
+// Determine whether the environment is local or deployed
 const isLocal =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "localhost";
 
-// ✅ قاعدة الرابط حسب البيئة
+// Set the base URL depending on the environment
 const BASE_URL = isLocal
   ? "http://127.0.0.1:8080"
   : "https://captchasysbacksmart.onrender.com";
 
-// ✅ المسارات حسب نوع البيانات
+// Define API endpoints for different input types
 const API_ENDPOINTS = {
   mouse: `${BASE_URL}/api/box`,
   touch: `${BASE_URL}/api/slider`,
 };
 
-// 🔁 شرح سبب الخطأ بناءً على النوع (من كودك الأصلي)
+// Maps internal error types to human-readable reasons
 function getErrorInfo(type) {
   const reasons = {
     "fake-box": "Clicked on fake box",
@@ -29,7 +29,7 @@ function getErrorInfo(type) {
   return { reason: reasons[type] || reasons["unknown"] };
 }
 
-// ✅ دالة موحدة لإرسال البيانات (ماوس أو لمس)
+// Unified function for sending mouse or touch data to the backend
 export async function sendToBackendData(type, data, errorType = null) {
   const isRobotDetected = data.mode === "robot-detected";
   const clickedFakeBox = errorType === "fake-box";
@@ -38,10 +38,10 @@ export async function sendToBackendData(type, data, errorType = null) {
   let payload;
 
   if (isRobotDetected) {
-    // إذا الخلفية هي التي حظرت المستخدم
+    // Case: server-side ban already triggered
     payload = { ...data };
   } else if (clickedFakeBox) {
-    // إذا تم النقر على صندوق زائف
+    // Case: user clicked a fake checkbox
     const reason = getErrorInfo(errorType);
     payload = {
       behaviorType: "robot",
@@ -50,7 +50,7 @@ export async function sendToBackendData(type, data, errorType = null) {
       pageUrl: window.location.href,
     };
   } else if (type === "touch") {
-    // إذا كانت البيانات من اللمس (Slider)
+    // Case: slider/touch-based data
     payload = {
       avgSpeed: data.avgSpeed,
       stdSpeed: data.stdSpeed,
@@ -64,7 +64,7 @@ export async function sendToBackendData(type, data, errorType = null) {
       userAgent: navigator.userAgent,
     };
   } else {
-    // بيانات الماوس العادية
+    // Case: regular mouse input data
     payload = {
       ...data,
       pageUrl: window.location.href,
@@ -72,7 +72,7 @@ export async function sendToBackendData(type, data, errorType = null) {
   }
 
   try {
-    console.log("📤 Sending to:", url);
+    console.log("Sending to:", url);
     console.log("Payload:", JSON.stringify(payload, null, 2));
 
     const response = await fetch(url, {
@@ -86,7 +86,7 @@ export async function sendToBackendData(type, data, errorType = null) {
 
     const contentType = response.headers.get("Content-Type") || "";
     if (!contentType.includes("application/json")) {
-      console.warn("❌ Response is not JSON.");
+      console.warn("Response is not JSON.");
       return { success: false };
     }
 
@@ -94,14 +94,14 @@ export async function sendToBackendData(type, data, errorType = null) {
     const result = text ? JSON.parse(text) : null;
 
     if (!result) {
-      console.error("❌ Empty backend response");
+      console.error("Empty backend response");
       return { success: false };
     }
 
-    console.log("✅ Backend response:", result);
+    console.log("Backend response:", result);
     return result;
   } catch (err) {
-    console.error("❌ Failed to send data:", err);
+    console.error("Failed to send data:", err);
     return { success: false };
   }
 }

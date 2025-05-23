@@ -2,15 +2,12 @@
 body {
   display: flex;
   justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
-  height: 100vh; /* Full screen height */
+  align-items: center;     /* Center content vertically */
+  height: 100vh;           /* Full screen height */
   background-color: #f4f4f4 !important;
   font-family: Arial, sans-serif;
   user-select: none !important; /* Prevent text selection */
 }
-
-
-
 
 /* Captcha container box */
 .captcha-box {
@@ -21,57 +18,52 @@ body {
   gap: 10px;
   border-radius: 5px;
   border: 1px solid gray;
-  width: 450px; /* أصغر */
+  width: 450px; /* Smaller fixed width */
   padding: 8px 10px;
   background-color: #f8f8f8;
 }
 
-/* Text + Checkbox */
+/* Text and Checkbox section */
 .checkbox-with-text {
   display: flex;
   align-items: center;
   gap: 18px;
-   margin-top: 15px;
+  margin-top: 15px;
   margin-bottom: 10px;
 }
 
-
-
-/* Logo size */
+/* Logo image size */
 .captcha-logo {
   width: 80px;
   height: auto;
 }
 
-
-
-/* Label style */
+/* Label for CAPTCHA status */
 .captcha-label {
   font-size: 1.2rem;
-   color: #727272; /* ← لون غامق */
+  color: #727272; /* Dark gray color */
 }
 
-
-/* Checkbox container */
+/* Container for the checkboxes */
 #checkbox-container {
   position: relative;
   display: flex;
   margin-top: 15px;
   gap: 15px;
   margin-bottom: 10px;
-  margin-left: 15px; /* ← حرّكه لليمين */
+  margin-left: 15px; /* Push to the right */
 }
 
-/* Checkbox styling */
+/* Checkbox basic styling */
 input[type="checkbox"] {
-  appearance: none; /* Remove default browser style */
+  appearance: none;
   width: 36px;
   aspect-ratio: 1 / 1;
   cursor: pointer;
   background-color: white;
 }
 
-/* Captcha message display */
+/* Message box styling */
 .captcha-message {
   margin-top: 10px;
   padding: 10px;
@@ -101,9 +93,7 @@ input[type="checkbox"] {
   background-color: #f8d7da;
 }
 
-
-
-/* Button group at top right */
+/* Button group styling */
 .button-group {
   position: absolute;
   top: 20px;
@@ -113,7 +103,7 @@ input[type="checkbox"] {
   gap: 10px;
 }
 
-/* Button styles */
+/* Style for all buttons */
 .button-group button {
   font-size: 16px;
   padding: 10px 20px;
@@ -133,7 +123,7 @@ input[type="checkbox"] {
   background-color: #6e8b63;
 }
 
-/* Toggle fake boxes button - olive green */
+/* Toggle fake boxes - olive green */
 .toggle-fake-button {
   background-color: #6e8b63;
 }
@@ -157,7 +147,7 @@ input[type="checkbox"] {
   background-color: #117a8b;
 }
 
-/* loading when righ click */
+/* Loading spinner style */
 .loading-spinner {
   width: 30px;
   height: 30px;
@@ -174,11 +164,7 @@ input[type="checkbox"] {
   }
 }
 
-
-
-
-
-/* ستايل عام للجميع */
+/* Shared checkbox box styling */
 .checkbox-box {
   width: 36px;
   height: 36px;
@@ -187,24 +173,21 @@ input[type="checkbox"] {
   appearance: none;
 }
 
-/* الفايك */
+/* Fake checkbox styling */
 .fake-checkbox {
   border: 2px solid red;
   background-color: #ffeaea;
 }
 
-/* الحقيقي */
+/* Real checkbox styling */
 .real-checkbox {
   border: 2px solid rgb(163, 163, 163);
   background-color: #eaffea;
 }
 
+/* Slider CAPTCHA (touch) styles */
 
-
-
-/*------- touch--------------------- */
-
-/* Slider Wrapper */
+/* Wrapper for slider */
 .slider-wrapper {
   display: flex;
   flex-direction: column;
@@ -213,9 +196,9 @@ input[type="checkbox"] {
   margin-top: 20px;
 }
 
-/* Track */
+/* Slider track */
 #slider-track {
-   width: 200px;
+  width: 200px;
   transition: width 0.3s ease;
   height: 40px;
   background-color: #e0e0e0;
@@ -224,7 +207,7 @@ input[type="checkbox"] {
   overflow: hidden;
 }
 
-/* Handle */
+/* Slider handle */
 #slider-handle {
   width: 40px;
   height: 40px;

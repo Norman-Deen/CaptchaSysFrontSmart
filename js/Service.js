@@ -1,4 +1,4 @@
-// 📁 Service.js
+// Service.js
 
 //  Function to check if the click was too fast (less than 300ms)
 // Used to detect suspicious behavior, as bots often click very fast.
