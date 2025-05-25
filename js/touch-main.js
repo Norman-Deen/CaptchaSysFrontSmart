@@ -20,7 +20,7 @@ let maxOffset = 0;
 let failedAttempts = 0;
 
 let hasVisuallyExtended = false;
-let hasSecretlyExtended = false;
+let hasSecretlyExtended = false;                                                              //check this
 
 // DOM references
 const handle = document.getElementById("slider-handle");
