@@ -14,15 +14,10 @@ Frontend for a smart CAPTCHA system that detects bots using **mouse** and **touc
 
 ## Usage
 
-1. Open `index.html` in your browser  
-2. Connect to a backend running at `http://localhost:8080` or a deployed URL  
-3. View logs in `logs-dashboard.html`  
-4. Explore stats in `analytics-dashboard.html`
+1. Open [`index.html` in your browser  ](https://norman-deen.github.io/CaptchaSysFrontSmart/)
 
 ## Contact
 
 **Norman Deen**  
 📧 Deen80@live.com  
 🌍 [LinkedIn](https://www.linkedin.com/in/nour-tinawi)
-
-**hasan Sero** 
