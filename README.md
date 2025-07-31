@@ -71,7 +71,7 @@ To try the system:
 
 **👨‍💻 Norman Deen (Nour Altinawi)**  
 📧 [Deen80@live.com](mailto:Deen80@live.com)  
-🌍 [nourdeen.se](https://www.nourdeen.se)  
+🌍 [pure-art](https://www.pure-art.co)
 🔗 [LinkedIn](https://www.linkedin.com/in/nour-tinawi)
 
 ---
