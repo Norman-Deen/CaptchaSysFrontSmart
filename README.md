@@ -45,7 +45,7 @@ To try the system:
 
 - 🔹 **Frontend Demo**: [GitHub Pages](https://norman-deen.github.io/CaptchaSysFrontSmart/)
 - 🔹 **Backend API (Render)**: [Ping](https://captchasysbacksmart.onrender.com/api/ping)
-- 🔹 **My Website**: [nourdeen.se](https://www.nourdeen.se)
+- 🔹 **My Website**: [nourdeen.se](https://www.pure-art.co)
 
 ---
 
