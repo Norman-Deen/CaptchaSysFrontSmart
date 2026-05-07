@@ -1,81 +1,91 @@
-# AI-based CAPTCHA System (Frontend)
+# AI Motion CAPTCHA System
 
-Frontend interface for a smart CAPTCHA system that distinguishes bots from human users by analyzing motion behavior.
+An experimental AI-powered CAPTCHA concept that analyzes user movement behavior instead of relying on traditional image-selection challenges.
 
-> ⚠️ **Private Project** – Created as part of a graduation thesis at EC Utbildning. Not open-source.
-
----
-
-## 🎯 Project Overview
-
-This project is part of my final thesis:  
-**"AI-baserat CAPTCHA-system med rörelseanalys"**  
-The goal was to build a CAPTCHA solution that avoids traditional image-based methods and instead relies on user movement (mouse or touch) to detect bots in a seamless way.
-
-The system includes both desktop and mobile versions and uses a simple UI (checkbox and slider) to collect behavioral data, which is then analyzed using AI in the backend.
+> Academic research project developed during my .NET Fullstack studies at EC Utbildning.
 
 ---
 
-## 🔧 Features
+## Overview
 
-- 🖱️ **Mouse CAPTCHA**: Fake checkbox traps
-- 📱 **Touch CAPTCHA**: Slider with behavior tracking
-- 🧠 **AI Behavior Analysis**: Based on speed, deceleration, and path irregularity
-- 📊 **Analytics Dashboard**: Built with Chart.js
-- 📁 **CSV Logging**: All attempts stored for model training
-- 🔗 **Backend Communication**: Integrated with a .NET + ML.NET API
+This project explores a different approach to CAPTCHA systems by focusing on behavioral analysis rather than visual puzzles.
 
----
+Instead of asking users to identify traffic lights or select images, the system analyzes how a person interacts with the interface using motion patterns such as:
 
-## 🚀 How to Test
+* Cursor movement
+* Drag behavior
+* Speed variation
+* Deceleration
+* Path irregularity
+* Touch interaction patterns
 
-This project is for **demonstration only** and is not intended for installation or reuse.
-
-To try the system:
-
-1. Open [`index.html` in your browser](https://norman-deen.github.io/CaptchaSysFrontSmart/)
-2. Interact with the checkbox (desktop) or the slider (mobile)
-3. Your behavior will be analyzed and sent to the backend AI
-
-> ⚠️ **The code is not for reuse. This is a private, academic project.**
+The goal was to investigate whether AI-based motion analysis could help distinguish human users from automated behavior in a more seamless and user-friendly way.
 
 ---
 
-## 🌐 Live & Hosted Links
+## Main Features
 
-- 🔹 **Frontend Demo**: [GitHub Pages](https://norman-deen.github.io/CaptchaSysFrontSmart/)
-- 🔹 **Backend API (Render)**: [Ping](https://captchasysbacksmart.onrender.com/api/ping)
-- 🔹 **My Website**: [pure-art](https://www.pure-art.co)
-
----
-
-## 📚 Technologies Used
-
-- HTML, CSS, JavaScript (Vanilla)
-- Chart.js for analytics
-- .NET 8 & ML.NET in backend
-- Hosted via Render.com (backend) and GitHub Pages (frontend)
-- AI scoring based on user motion behavior
+* AI-based motion behavior analysis
+* Desktop interaction tracking
+* Mobile touch & slider tracking
+* Real-time frontend visualization
+* CSV-based training data collection
+* Integrated .NET + ML.NET backend
+* Interactive analytics dashboard using Chart.js
 
 ---
 
-## 🧑‍🏫 Teacher’s Feedback (EC Utbildning)
+## Tech Stack
 
-> *"You have completed a technically interesting and independent thesis project with clear relevance and application in web and AI security. The work demonstrates a good understanding of how to combine frontend technologies (JavaScript) with .NET backend and ML.NET to build a functional CAPTCHA solution. The system is well-thought-out, innovative, and shows a professional approach."*
-
-– Hans Mattin-Lassei, EC Utbildning
-
----
-
-## 📬 Contact
-
-**👨‍💻 Norman Deen (Nour Altinawi)**  
-📧 [Deen80@live.com](mailto:Deen80@live.com)  
-🌍 [pure-art](https://www.pure-art.co)
-🔗 [LinkedIn](https://www.linkedin.com/in/nour-tinawi)
+* HTML / CSS / Vanilla JavaScript
+* .NET 8
+* ML.NET
+* Chart.js
+* GitHub Pages
+* Render.com
 
 ---
 
-## 🧠 Disclaimer
+## Live Demo
 
-This project was developed as a part of my .NET graduation program at EC Utbildning, focusing on real-world application of web, backend, and AI integration technologies. It’s a simplified proof-of-concept and not intended for production use.
+* Frontend Demo:
+  [GitHub Pages Demo](https://norman-deen.github.io/CaptchaSysFrontSmart/?utm_source=chatgpt.com)
+
+* Backend API:
+  [Render API Ping](https://captchasysbacksmart.onrender.com/api/ping?utm_source=chatgpt.com)
+
+* Portfolio Website:
+  [Pure-Art.co](https://www.pure-art.co?utm_source=chatgpt.com)
+
+---
+
+## Purpose of the Project
+
+This system was created as a research-oriented proof of concept to explore the intersection between:
+
+* Web interaction
+* Behavioral analytics
+* AI-assisted verification
+* Frontend and backend integration
+
+The project focuses on experimentation, usability, and real-world technical implementation rather than production deployment.
+
+---
+
+## Academic Feedback
+
+> “The work demonstrates a strong understanding of combining frontend technologies with .NET backend development and ML.NET to create an innovative and functional CAPTCHA solution.”
+
+— EC Utbildning
+
+---
+
+## Contact
+
+**Nour Tinawi (Norman Deen)**
+
+* LinkedIn:
+  [LinkedIn Profile](https://www.linkedin.com/in/nour-tinawi?utm_source=chatgpt.com)
+
+* Website:
+  [Pure-Art.co](https://www.pure-art.co?utm_source=chatgpt.com)
