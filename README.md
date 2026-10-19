@@ -49,13 +49,13 @@ The goal was to investigate whether AI-based motion analysis could help distingu
 ## Live Demo
 
 * Frontend Demo:
-  [GitHub Pages Demo](https://norman-deen.github.io/CaptchaSysFrontSmart/?utm_source=chatgpt.com)
+  [GitHub Pages Demo](https://norman-deen.github.io/CaptchaSysFrontSmart/)
 
 * Backend API:
-  [Render API Ping](https://captchasysbacksmart.onrender.com/api/ping?utm_source=chatgpt.com)
+  [Render API Ping](https://captchasysbacksmart.onrender.com/api/ping)
 
 * Portfolio Website:
-  [Pure-Art.co](https://www.pure-art.co?utm_source=chatgpt.com)
+  [Nourtin](https://nourtin.com)
 
 ---
 
@@ -85,7 +85,17 @@ The project focuses on experimentation, usability, and real-world technical impl
 **Nour Tinawi (Norman Deen)**
 
 * LinkedIn:
-  [LinkedIn Profile](https://www.linkedin.com/in/nour-tinawi?utm_source=chatgpt.com)
+  [LinkedIn Profile](https://www.linkedin.com/in/nour-tinawi)
 
 * Website:
-  [Pure-Art.co](https://www.pure-art.co?utm_source=chatgpt.com)
+  [Nourtin](https://nourtin.com)
+
+## Local development
+
+Serve this folder over HTTP rather than opening `index.html` as a local file, because the interface uses JavaScript modules. With Python installed:
+
+```bash
+python -m http.server 5500
+```
+
+Open `http://localhost:5500`. Start the paired backend on port `8080`; `js/SendToBackend.js` selects that local endpoint automatically. The log and analytics dashboards are retained as demonstration tools. This is a graduation research prototype, not a production security service.

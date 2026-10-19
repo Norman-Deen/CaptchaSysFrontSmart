@@ -1,0 +1,6 @@
+# Operating-system metadata and editor recovery files
+Thumbs.db
+.DS_Store
+*.tmp
+*.TMP
+*~
